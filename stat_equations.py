@@ -1,7 +1,7 @@
 """
 Class: StatEquations
 Author: Poirel & Jett
-Date: 6 July 2014
+Date: 12 July 2014
 
 This class computes the following stats:
 
@@ -41,185 +41,409 @@ class StatEquations:
     ############
 
     def pitcher_points_expected_for_k(self, player):
-        pitcher_k_per_9 = self.player_stats.get_pitcher_total_k(self.year, player) / (self.player_stats.get_pitcher_total_innings_pitched(self.year, player) / 9.0)
-        expected_ip = self.player_stats.get_pitcher_total_innings_pitched(self.year, player) / self.player_stats.get_pitcher_total_games_started(self.year, player)
+        """
+        Function: pitcher_points_expected_for_k
+        -----------------
+        Equation to determine the total number of points expected for a pitcher's total k's
 
-        playerTeam = self.player_stats.get_player_team(player)
-        playerPitchHand = self.player_stats.get_player_throwing_hand(player)
-        oppTeam = self.team_stats.get_team_opponent(playerTeam)
+        Parameters
+            :param player: the pitcher whose points we are trying to determine
 
-        opp_k_percentage = (self.team_stats.get_team_k_vs_RHP_LHP(self.year, oppTeam, playerPitchHand) / self.team_stats.get_team_pa_vs_RHP_LHP(self.year, oppTeam, playerPitchHand)) / self.league_stats.get_league_k_percentage(self.year)
+        Formula Factors
+            - k_per_ip: total_k / ip
+            - expected_ip: total_ip / total_games_started
 
-        return pitcher_k_per_9 * (expected_ip/9) * opp_k_percentage
+        Formula Multipliers
+            - opp_team_k_percent_mult: [(team_k_vs_RHP_LHP) / (team_pa_vs_RHP_LHP)] / [league_k_percentage]
+
+        :return (k_per_ip) * (expected_ip) * (opp_team_k_percent_mult)
+        """
+
+       #Helper variables
+        pitcherTeam = self.player_stats.get_player_team(player)
+        pitcherPitchHand = self.player_stats.get_player_throwing_hand(player)
+        oppTeam = self.team_stats.get_team_opponent(pitcherTeam)
+
+       #Equations
+        k_per_ip = 1.0 * (self.player_stats.get_pitcher_total_k(self.year, player) / \
+                          (self.player_stats.get_pitcher_total_innings_pitched(self.year, player)))
+
+        opp_team_k_percent_mult = 1.0 * ((self.team_stats.get_team_k_vs_RHP_LHP(self.year, oppTeam, pitcherPitchHand) /
+                            self.team_stats.get_team_pa_vs_RHP_LHP(self.year, oppTeam, pitcherPitchHand)) / \
+                           self.league_stats.get_league_k_percentage(self.year))
+
+        return (k_per_ip) * self.pitcher_expected_ip(player) * (opp_team_k_percent_mult)
 
     def pitcher_expected_ip(self, player):
-        return self.player_stats.get_pitcher_total_innings_pitched(self.year, player) / self.player_stats.get_pitcher_total_games_started(self.year, player)
+        """
+        Function: pitcher_expected_ip
+        -----------------
+        Equation to determine the total number of points expected for a pitcher's total ip
+
+        Parameters
+            :param player: the pitcher whose points we are trying to determine
+
+        Formula Factors
+            - expected_ip: total_ip / total_games_started
+
+        Formula Multipliers
+            - none
+
+        :return expected_ip
+        """
+        return 1.0 * (self.player_stats.get_pitcher_total_innings_pitched(self.year, player) /
+                      self.player_stats.get_pitcher_total_games_started(self.year, player))
 
     def pitcher_points_expected_for_win(self, player):
         # TODO: need vegas lines
         return 2
 
     def pitcher_points_expected_for_er(self, player):
-        player_team = self.player_stats.get_player_team(player)
-        opp_team = self.team_stats.get_team_opponent(player_team)
-        player_loc = self.team_stats.get_team_home_or_away(player_team)
-        xfip = self.player_stats.get_pitcher_xfip_allowed(self.year, player, player_loc)
+        """
+        Function: pitcher_points_expected_for_er
+        -----------------
+        Equation to determine the total number of points expected for a pitcher's total er allowed.
+        This equation should return negative values
 
-        if player_loc=='home':
-            park_team = player_team
+        Parameters
+            :param player: the pitcher whose points we are trying to determine
+
+        Formula Factors
+            - xfip: value normalized to ERA
+            - expected_ip: total_ip / total_games_started
+
+        Formula Multipliers
+            - park_factor: factor from rotowire
+            - pitcher_hand_hits_mult: team_woba_vs_RHP_LHP / league_woba
+
+        :return -1.0 * xfip * ballpark_mult * pitcher_hand_hits_mult * (self.pitcher_expected_ip(player)/9)
+        """
+
+        #Helper variables
+        pitcher_team = self.player_stats.get_player_team(player)
+        opp_team = self.team_stats.get_team_opponent(pitcher_team)
+        pitcher_loc = self.team_stats.get_team_home_or_away(pitcher_team)
+        pitcher_hand = self.player_stats.get_player_throwing_hand(player)
+        if pitcher_loc=='home':
+            park_team = pitcher_team
         else:
             park_team = opp_team
+
+        #Variables
+        xfip = self.player_stats.get_pitcher_xfip_allowed(self.year, player, pitcher_loc)
+
         park_factor = self.ballpark_stats.get_ballpark_factor_overall(park_team)
 
-        player_hand = self.player_stats.get_player_throwing_hand(player)
-        pitcher_hand_hits = 1.0 * self.team_stats.get_team_woba_vs_RHP_LHP(self.year, opp_team, player_hand) / self.league_stats.get_league_woba(self.year)
+        pitcher_hand_hits_mult = 1.0 * self.team_stats.get_team_woba_vs_RHP_LHP(self.year, opp_team, pitcher_hand) / \
+                            self.league_stats.get_league_woba(self.year)
 
-        return -1.0/9 * xfip * park_factor * pitcher_hand_hits * self.pitcher_expected_ip(player)
+        return -1.0 * xfip * park_factor * pitcher_hand_hits_mult * (self.pitcher_expected_ip(player)/9)
 
     ###########
     # BATTERS #
     ###########
 
-    def batter_points_expected_for_hits(self, player):
-        adj_slg = (1.0 * self.player_stats.get_batter_1b_total(self.year, player) +
-                   2.0 * self.player_stats.get_batter_2b_total(self.year, player) +
-                   3.0 * self.player_stats.get_batter_3b_total(self.year, player) -
-                   0.25 * (self.player_stats.get_batter_ab_total(self.year, player) - self.player_stats.get_batter_hits_total(self.year, player))) / \
-                  (self.player_stats.get_batter_ab_total(self.year, player) - self.player_stats.get_batter_hr_total(self.year, player))
+    def batter_points_expected_for_hits(self, batter):
+        """
+        Function: batter_points_expected_for_hits
+        -----------------
+        Equation to determine the total number of points expected for a batter's hits (excluding hrs).
 
-        exp_ab = 1.0 * self.player_stats.get_batter_ab_total(self.year, player) / self.player_stats.get_batter_games_played_total(self.year, player)
+        Parameters
+            :param batter: the batter whose points we are trying to determine
 
-        player_team = self.player_stats.get_player_team(player)
-        player_hand = self.player_stats.get_player_batting_hand(player)
-        opp_team = self.team_stats.get_team_opponent(player_team)
+        Formula Factors
+            - adj_slg: proprietary formula for determining hits
+            - exp_ab: ab / g
+
+        Formula Multipliers
+            - pitcher_eff: pitcher wOBA vs RHB/LHB / league wOBA
+            - batter_eff: batter wOBA vs RHB/LHB / league wOBA
+            - park_factor: rotowire factor for batting average
+
+        :return adj_slg * exp_ab * pitcher_eff * batter_eff * park_factor
+        """
+
+        #Helper Variables
+        batter_outs = (self.player_stats.get_batter_ab_total(self.year, batter) -
+                       self.player_stats.get_batter_hits_total(self.year, batter))
+        batter_team = self.player_stats.get_player_team(batter)
+        batter_hand = self.player_stats.get_player_batting_hand(batter)
+        opp_team = self.team_stats.get_team_opponent(batter_team)
         opp_pitcher = self.player_stats.get_starting_pitcher(opp_team)
-        opp_pitcher_woba = self.player_stats.get_pitcher_woba_allowed_vs_RHB_LHB(self.year, opp_pitcher, player_hand)
-        opp_pitcher_eff = 1.0 * opp_pitcher_woba / self.league_stats.get_league_woba(self.year)
-
+        opp_pitcher_woba = self.player_stats.get_pitcher_woba_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
         opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
-        player_bat_eff = 1.0 * self.player_stats.get_batter_woba_vs_RHP_LHP(self.year, player, opp_pitcher_hand) / self.league_stats.get_league_woba(self.year)
-
-        if self.team_stats.get_team_home_or_away(player_team)=='home':
-            park = player_team
+        if self.team_stats.get_team_home_or_away(batter_team)=='home':
+            park = batter_team
         else:
             park = opp_team
-        park_factor = self.ballpark_stats.get_ballpark_factor_batting_average(park, player_hand)
 
-        return adj_slg * exp_ab * opp_pitcher_eff * player_bat_eff * park_factor
+        #Equations
+        adj_slg = (1.0 * self.player_stats.get_batter_1b_total(self.year, batter) +
+                   2.0 * self.player_stats.get_batter_2b_total(self.year, batter) +
+                   3.0 * self.player_stats.get_batter_3b_total(self.year, batter) -
+                   0.25 * (batter_outs)) / \
+                  (self.player_stats.get_batter_ab_total(self.year, batter) -
+                   self.player_stats.get_batter_hr_total(self.year, batter))
 
+        #TODO: expected at bats should come from a batter's lineup position
+        exp_ab = 1.0 * self.player_stats.get_batter_ab_total(self.year, batter) / \
+                 self.player_stats.get_batter_games_played_total(self.year, batter)
 
-    def batter_points_expected_for_walks(self, player):
-        batter_walk_percentage = self.player_stats.get_batter_bb_percent_total(self.year, player)
+        pitcher_eff = 1.0 * opp_pitcher_woba / self.league_stats.get_league_woba(self.year)
 
-        exp_ab = 1.0 * self.player_stats.get_batter_ab_total(self.year, player) / self.player_stats.get_batter_games_played_total(self.year, player)
+        batter_eff = 1.0 * self.player_stats.get_batter_woba_vs_RHP_LHP(self.year, batter, opp_pitcher_hand) / \
+                         self.league_stats.get_league_woba(self.year)
 
-        player_team = self.player_stats.get_player_team(player)
-        player_hand = self.player_stats.get_player_batting_hand(player)
-        opp_team = self.team_stats.get_team_opponent(player_team)
+        park_factor = self.ballpark_stats.get_ballpark_factor_batting_average(park, batter_hand)
+
+        return adj_slg * exp_ab * pitcher_eff * batter_eff * park_factor
+
+    def batter_points_expected_for_walks(self, batter):
+        """
+        Function: batter_points_expected_for_walks
+        -----------------
+        Equation to determine the total number of points expected for a batter's hits (excluding hrs).
+
+        Parameters
+            :param batter: the batter whose points we are trying to determine
+
+        Formula Factors
+            - batter_walk_percentage: batter_bb_percent_total
+            - exp pa: pa / g
+
+        Formula Multipliers
+            - pitcher_eff: pitcher_bb_perc / league_bb_perc
+
+        :return batter_walk_percentage * exp_pa * pitcher_eff
+        """
+
+        #Helper Variables
+        batter_team = self.player_stats.get_player_team(batter)
+        batter_hand = self.player_stats.get_player_batting_hand(batter)
+        opp_team = self.team_stats.get_team_opponent(batter_team)
         opp_pitcher = self.player_stats.get_starting_pitcher(opp_team)
-        pitcher_bb_perc = 1.0 * self.player_stats.get_pitcher_bb_allowed_vs_RHB_LHB(self.year, opp_pitcher, player_hand) / self.player_stats.get_pitcher_total_batters_faced_vs_RHB_LHB(self.year, opp_pitcher, player_hand)
-        league_bb_perc = 1.0 * self.league_stats.get_league_bb(self.year) / self.league_stats.get_league_plate_appearance(self.year)
-        pitcher_eff_walk = pitcher_bb_perc / league_bb_perc
+        pitcher_bb_perc = 1.0 * self.player_stats.get_pitcher_bb_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand) /\
+                          self.player_stats.get_pitcher_total_batters_faced_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
+        league_bb_perc = 1.0 * self.league_stats.get_league_bb(self.year) /\
+                         self.league_stats.get_league_plate_appearance(self.year)
 
-        return batter_walk_percentage * exp_ab * pitcher_eff_walk
+        #Equations
+        #TODO: expected at bats should come from a batter's lineup position...but this is PA
+        exp_pa = 1.0 * self.player_stats.get_batter_pa_total(self.year, batter) /\
+                 self.player_stats.get_batter_games_played_total(self.year, batter)
 
-    def batter_points_expected_for_hr(self, player):
-        batter_hr_percentage = 1.0 * self.player_stats.get_batter_hr_total(self.year, player) / self.player_stats.get_batter_pa_total(self.year, player)
+        batter_walk_percentage = self.player_stats.get_batter_bb_percent_total(self.year, batter)
 
-        exp_ab = 1.0 * self.player_stats.get_batter_ab_total(self.year, player) / self.player_stats.get_batter_games_played_total(self.year, player)
+        pitcher_eff = pitcher_bb_perc / league_bb_perc
 
-        player_team = self.player_stats.get_player_team(player)
-        player_hand = self.player_stats.get_player_batting_hand(player)
-        opp_team = self.team_stats.get_team_opponent(player_team)
+        return batter_walk_percentage * exp_pa * pitcher_eff
+
+    def batter_points_expected_for_hr(self, batter):
+        """
+        Function: batter_points_expected_for_hrs
+        -----------------
+        Equation to determine the total number of points expected for a batter's hrs.
+
+        Parameters
+            :param batter: the batter whose points we are trying to determine
+
+        Formula Factors
+            - batter_hr_percentage: hr / pa
+            - exp_pa: pa / g
+
+        Formula Multipliers
+            - pitcher_eff: pitcher hr % bs RHB/LHB / league hr percent
+            - batter_eff: hr % vs RHP/LHP / league hr percent
+            - park_factor: rotowire facotr for HRs
+
+        :return 4.0 * batter_hr_percentage * exp_pa * pitcher_eff * batter_eff * park_factor
+        """
+
+        #Helper Variables
+        batter_team = self.player_stats.get_player_team(batter)
+        batter_hand = self.player_stats.get_player_batting_hand(batter)
+        opp_team = self.team_stats.get_team_opponent(batter_team)
         opp_pitcher = self.player_stats.get_starting_pitcher(opp_team)
-        opp_pitcher_hr_percentage = 1.0 * self.player_stats.get_pitcher_hr_allowed_vs_RHB_LHB(self.year, opp_pitcher, player_hand) / self.player_stats.get_pitcher_total_batters_faced_vs_RHB_LHB(self.year, opp_pitcher, player_hand)
-        league_avg_hr_percentage = 1.0 * self.league_stats.get_league_homerun(self.year) / self.league_stats.get_league_plate_appearance(self.year)
-        opp_pitcher_eff_hr = opp_pitcher_hr_percentage / league_avg_hr_percentage
-
+        opp_pitcher_hr_percentage = 1.0 * self.player_stats.get_pitcher_hr_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand) /\
+                                    self.player_stats.get_pitcher_total_batters_faced_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
+        league_hr_percentage = 1.0 * self.league_stats.get_league_homerun(self.year) /\
+                                   self.league_stats.get_league_plate_appearance(self.year)
         opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
-        batter_hr_vs_hand_percentage = self.player_stats.get_batter_hr_vs_RHP_LHP(self.year, player, opp_pitcher_hand) / self.player_stats.get_batter_plate_appearances_vs_RHP_LHP(self.year, player, opp_pitcher_hand)
-        batter_eff_hr = batter_hr_vs_hand_percentage / league_avg_hr_percentage
-
-        if self.team_stats.get_team_home_or_away(player_team)=='home':
-            park = player_team
+        batter_hr_vs_hand_percentage = self.player_stats.get_batter_hr_vs_RHP_LHP(self.year, batter, opp_pitcher_hand) /\
+                                       self.player_stats.get_batter_plate_appearances_vs_RHP_LHP(self.year, batter, opp_pitcher_hand)
+        if self.team_stats.get_team_home_or_away(batter_team)=='home':
+            park = batter_team
         else:
             park = opp_team
-        park_factor_hr = self.ballpark_stats.get_ballpark_factor_homerun(park, player_hand)
 
-        return 4.0 * batter_hr_percentage * exp_ab * opp_pitcher_eff_hr * batter_eff_hr * park_factor_hr
+        #Equations
+        batter_hr_percentage = 1.0 * self.player_stats.get_batter_hr_total(self.year, batter) /\
+                               self.player_stats.get_batter_pa_total(self.year, batter)
+        
+        #TODO: expected at bats should come from a batter's lineup position...but this is PA
+        exp_pa = 1.0 * self.player_stats.get_batter_pa_total(self.year, batter) /\
+                 self.player_stats.get_batter_games_played_total(self.year, batter)
 
+        pitcher_eff = opp_pitcher_hr_percentage / league_hr_percentage
 
-    def batter_points_expected_for_sb(self, player):
-        batter_sb_per_game = 1.0 * self.player_stats.get_batter_sb_total(self.year, player) / self.player_stats.get_batter_games_played_total(self.year, player)
+        batter_eff = batter_hr_vs_hand_percentage / league_hr_percentage
 
-        player_team = self.player_stats.get_player_team(player)
-        opp_team = self.team_stats.get_team_opponent(player_team)
-        team_sb_percentage = 1.0 * self.team_stats.get_team_sb_allowed(self.year, opp_team) / (self.team_stats.get_team_sb_allowed(self.year, opp_team) + self.team_stats.get_team_cs_fielding(self.year, opp_team))
-        league_sb_percentage =  1.0 * self.league_stats.get_league_stolen_bases(self.year) / (self.league_stats.get_league_stolen_bases(self.year) + self.league_stats.get_league_caught_stealing(self.year))
-        team_eff_sb = team_sb_percentage / league_sb_percentage
+        park_factor = self.ballpark_stats.get_ballpark_factor_homerun(park, batter_hand)
 
-        return 2.0* batter_sb_per_game * team_eff_sb
+        return 4.0 * batter_hr_percentage * exp_pa * pitcher_eff * batter_eff * park_factor
 
-    def batter_points_expected_for_runs(self, player):
-        batter_runs_per_pa = 0.330 * self.player_stats.get_batter_ba_total(self.year, player) + \
-                             0.187 * self.player_stats.get_batter_bb_percent_total(self.year, player) + \
-                             0.560 * self.player_stats.get_batter_hr_total(self.year, player) / self.player_stats.get_batter_pa_total(self.year, player)
+    def batter_points_expected_for_sb(self, batter):
+        """
+        Function: batter_points_expected_for_sbs
+        -----------------
+        Equation to determine the total number of points expected for a batter's sb.
 
-        exp_ab = 1.0 * self.player_stats.get_batter_ab_total(self.year, player) / self.player_stats.get_batter_games_played_total(self.year, player)
+        Parameters
+            :param batter: the batter whose points we are trying to determine
 
-        player_team = self.player_stats.get_player_team(player)
-        player_hand = self.player_stats.get_player_batting_hand(player)
-        opp_team = self.team_stats.get_team_opponent(player_team)
+        Formula Factors
+            - sb per game = sb / g
+
+        Formula Multipliers
+            - team_eff: team sb % allowed / league sb % allowed
+
+        :return 2.0 * batter_sb_per_game * team_eff
+        """
+        
+        #Helper Variables
+        batter_team = self.player_stats.get_player_team(batter)
+        opp_team = self.team_stats.get_team_opponent(batter_team)
+        team_sb_allowed_percentage = 1.0 * self.team_stats.get_team_sb_allowed(self.year, opp_team) /\
+                             (self.team_stats.get_team_sb_allowed(self.year, opp_team) + self.team_stats.get_team_cs_fielding(self.year, opp_team))
+        league_sb_allowed_percentage =  1.0 * self.league_stats.get_league_stolen_bases(self.year) /\
+                                (self.league_stats.get_league_stolen_bases(self.year) + self.league_stats.get_league_caught_stealing(self.year))
+        
+        #Equations
+        batter_sb_per_game = 1.0 * self.player_stats.get_batter_sb_total(self.year, batter) /\
+                             self.player_stats.get_batter_games_played_total(self.year, batter)
+
+        team_eff = team_sb_allowed_percentage / league_sb_allowed_percentage
+
+        return 2.0 * batter_sb_per_game * team_eff
+
+    def batter_points_expected_for_runs(self, batter):
+        """
+        Function: batter_points_expected_for_runs
+        -----------------
+        Equation to determine the total number of points expected for a batter's runs.
+
+        Parameters
+            :param batter: the batter whose points we are trying to determine
+
+        Formula Factors
+            - batter_runs_per_pa: proprietary formula
+            - exp_pa: pa / g
+
+        Formula Multipliers
+            - pitcher_eff: pitcher wOBA vs RHB/LHB / league wOBA
+            - batter_eff: batter wOBA vs RHP/LHP / league wOBA
+            - park_factor: rotowire factor overall
+            - team factor: team total runs / league avg total runs
+            - batting order factor: proprietary formula
+
+        :return batter_runs_per_pa * exp_pa * pitcher_eff * batter_eff * park_factor * batting_order_factor * team_factor
+        """
+        
+        #Helper Variables
+        batter_team = self.player_stats.get_player_team(batter)
+        batter_hand = self.player_stats.get_player_batting_hand(batter)
+        opp_team = self.team_stats.get_team_opponent(batter_team)
         opp_pitcher = self.player_stats.get_starting_pitcher(opp_team)
-        opp_pitcher_woba = self.player_stats.get_pitcher_woba_allowed_vs_RHB_LHB(self.year, opp_pitcher, player_hand)
-        opp_pitcher_eff = 1.0 * opp_pitcher_woba / self.league_stats.get_league_woba(self.year)
-
+        opp_pitcher_woba = self.player_stats.get_pitcher_woba_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
         opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
-        player_bat_eff = 1.0 * self.player_stats.get_batter_woba_vs_RHP_LHP(self.year, player, opp_pitcher_hand) / self.league_stats.get_league_woba(self.year)
-
-        if self.team_stats.get_team_home_or_away(player_team)=='home':
-            park = player_team
+        if self.team_stats.get_team_home_or_away(batter_team)=='home':
+            park = batter_team
         else:
             park = opp_team
+        
+        #Equations
+        batter_runs_per_pa = 0.330 * self.player_stats.get_batter_ba_total(self.year, batter) + \
+                             0.187 * self.player_stats.get_batter_bb_percent_total(self.year, batter) + \
+                             0.560 * (self.player_stats.get_batter_hr_total(self.year, batter) /\
+                             self.player_stats.get_batter_pa_total(self.year, batter))
+
+        exp_pa = 1.0 * self.player_stats.get_batter_pa_total(self.year, batter) /\
+                 self.player_stats.get_batter_games_played_total(self.year, batter)
+        
+        pitcher_eff = 1.0 * opp_pitcher_woba / self.league_stats.get_league_woba(self.year)
+
+        batter_eff = 1.0 * self.player_stats.get_batter_woba_vs_RHP_LHP(self.year, batter, opp_pitcher_hand) /\
+                     self.league_stats.get_league_woba(self.year)
+
         park_factor = self.ballpark_stats.get_ballpark_factor_overall(park)
 
         # TODO: get batting order for runs
         batting_order_factor = 1.0
 
-        team_factor = self.team_stats.get_team_runs_total(self.year, player_team) / (self.league_stats.get_league_runs(self.year) / 30.0)
+        team_factor = self.team_stats.get_team_runs_total(self.year, batter_team) /\
+                      (self.league_stats.get_league_runs(self.year) / 30.0)
 
-        return batter_runs_per_pa * exp_ab * opp_pitcher_eff * player_bat_eff * park_factor * batting_order_factor * team_factor
+        return batter_runs_per_pa * exp_pa * pitcher_eff * batter_eff * park_factor * batting_order_factor * team_factor
 
+    def batter_points_expected_for_rbi(self, batter):
+        """
+        Function: batter_points_expected_for_rbi
+        -----------------
+        Equation to determine the total number of points expected for a batter's rbis.
 
-    def batter_points_expected_for_rbi(self, player):
-        batter_runs_per_pa = 0.330 * self.player_stats.get_batter_ba_total(self.year, player) + \
-                             0.187 * self.player_stats.get_batter_bb_percent_total(self.year, player) + \
-                             0.560 * self.player_stats.get_batter_hr_total(self.year, player) / self.player_stats.get_batter_pa_total(self.year, player)
+        Parameters
+            :param batter: the batter whose points we are trying to determine
 
-        exp_ab = 1.0 * self.player_stats.get_batter_ab_total(self.year, player) / self.player_stats.get_batter_games_played_total(self.year, player)
+        Formula Factors
+            - batter_runs_per_pa: proprietary formula
+            - exp_pa: pa / g
 
-        player_team = self.player_stats.get_player_team(player)
-        player_hand = self.player_stats.get_player_batting_hand(player)
-        opp_team = self.team_stats.get_team_opponent(player_team)
+        Formula Multipliers
+            - pitcher_eff: pitcher wOBA vs RHB/LHB / league wOBA
+            - batter_eff: batter wOBA vs RHP/LHP / league wOBA
+            - park_factor: rotowire factor overall
+            - team factor: team total runs / league avg total runs
+            - batting order factor: proprietary formula
+
+        :return batter_runs_per_pa * exp_pa * pitcher_eff * batter_eff * park_factor * batting_order_factor * team_factor
+        """
+        
+        #Helper Variables
+        batter_team = self.player_stats.get_player_team(batter)
+        batter_hand = self.player_stats.get_player_batting_hand(batter)
+        opp_team = self.team_stats.get_team_opponent(batter_team)
         opp_pitcher = self.player_stats.get_starting_pitcher(opp_team)
-        opp_pitcher_woba = self.player_stats.get_pitcher_woba_allowed_vs_RHB_LHB(self.year, opp_pitcher, player_hand)
-        opp_pitcher_eff = 1.0 * opp_pitcher_woba / self.league_stats.get_league_woba(self.year)
-
+        opp_pitcher_woba = self.player_stats.get_pitcher_woba_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
         opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
-        player_bat_eff = 1.0 * self.player_stats.get_batter_woba_vs_RHP_LHP(self.year, player, opp_pitcher_hand) / self.league_stats.get_league_woba(self.year)
-
-        if self.team_stats.get_team_home_or_away(player_team)=='home':
-            park = player_team
+        if self.team_stats.get_team_home_or_away(batter_team)=='home':
+            park = batter_team
         else:
             park = opp_team
+        
+        #Equations
+        batter_runs_per_pa = 0.330 * self.player_stats.get_batter_ba_total(self.year, batter) + \
+                             0.187 * self.player_stats.get_batter_bb_percent_total(self.year, batter) + \
+                             0.560 * (self.player_stats.get_batter_hr_total(self.year, batter) /\
+                             self.player_stats.get_batter_pa_total(self.year, batter))
+
+        exp_pa = 1.0 * self.player_stats.get_batter_pa_total(self.year, batter) /\
+                 self.player_stats.get_batter_games_played_total(self.year, batter)
+        
+        pitcher_eff = 1.0 * opp_pitcher_woba / self.league_stats.get_league_woba(self.year)
+
+        batter_eff = 1.0 * self.player_stats.get_batter_woba_vs_RHP_LHP(self.year, batter, opp_pitcher_hand) /\
+                     self.league_stats.get_league_woba(self.year)
+
         park_factor = self.ballpark_stats.get_ballpark_factor_overall(park)
 
-        # TODO: get batting order for RBI
+        # TODO: get batting order for runs
         batting_order_factor = 1.0
 
-        team_factor = self.team_stats.get_team_runs_total(self.year, player_team) / (self.league_stats.get_league_runs(self.year) / 30.0)
+        team_factor = self.team_stats.get_team_runs_total(self.year, batter_team) /\
+                      (self.league_stats.get_league_runs(self.year) / 30.0)
 
-        return batter_runs_per_pa * exp_ab * opp_pitcher_eff * player_bat_eff * park_factor * batting_order_factor * team_factor
+        return batter_runs_per_pa * exp_pa * pitcher_eff * batter_eff * park_factor * batting_order_factor * team_factor
 
     ###########
     # Overall #
