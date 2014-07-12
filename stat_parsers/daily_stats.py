@@ -1,10 +1,18 @@
+"""
+Class: DailyStats
+Author: Nobody wants to claim this class...
+
+...
+
+"""
+
 from team_stats import *
 from collections import defaultdict
 import csv
 import json
 
 class DailyStats:
-
+    #TODO: WTF is going on with this class? We never use it and its full of team stats??
     def __init__(self, statsDir):
         self.statsDir = statsDir.rstrip('/')
 
