@@ -19,6 +19,7 @@ This class computes the following stats:
 Source of stats: internal classes
 """
 
+
 class StatEquations:
 
     def __init__(self, player_stats, team_stats, ballpark_stats, league_stats):
@@ -65,11 +66,11 @@ class StatEquations:
         oppTeam = self.team_stats.get_team_opponent(pitcherTeam)
 
        #Equations
-        k_per_ip = 1.0 * (self.player_stats.get_pitcher_total_k(self.year, pitcher) / \
+        k_per_ip = 1.0 * (self.player_stats.get_pitcher_total_k(self.year, pitcher) /
                           (self.player_stats.get_pitcher_total_innings_pitched(self.year, pitcher)))
 
         opp_team_k_percent_mult = 1.0 * ((self.team_stats.get_team_k_vs_RHP_LHP(self.year, oppTeam, pitcherPitchHand) /
-                            self.team_stats.get_team_pa_vs_RHP_LHP(self.year, oppTeam, pitcherPitchHand)) / \
+                            self.team_stats.get_team_pa_vs_RHP_LHP(self.year, oppTeam, pitcherPitchHand)) /
                            self.league_stats.get_league_k_percentage(self.year))
 
         return k_per_ip * self.pitcher_expected_ip(pitcher) * opp_team_k_percent_mult
@@ -124,7 +125,7 @@ class StatEquations:
         opp_team = self.team_stats.get_team_opponent(pitcher_team)
         pitcher_loc = self.team_stats.get_team_home_or_away(pitcher_team)
         pitcher_hand = self.player_stats.get_player_throwing_hand(pitcher)
-        if pitcher_loc=='home':
+        if pitcher_loc == 'home':
             park_team = pitcher_team
         else:
             park_team = opp_team
@@ -137,7 +138,7 @@ class StatEquations:
         pitcher_hand_hits_mult = 1.0 * self.team_stats.get_team_woba_vs_RHP_LHP(self.year, opp_team, pitcher_hand) / \
                             self.league_stats.get_league_woba(self.year)
 
-        return -1.0 * xfip * park_factor * pitcher_hand_hits_mult * (self.pitcher_expected_ip(pitcher)/9)
+        return -1.0 * xfip * park_factor * pitcher_hand_hits_mult * (self.pitcher_expected_ip(pitcher) / 9)
 
     ###########
     # BATTERS #
@@ -173,7 +174,7 @@ class StatEquations:
         opp_pitcher = self.player_stats.get_starting_pitcher(opp_team)
         opp_pitcher_woba = self.player_stats.get_pitcher_woba_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
         opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
-        if self.team_stats.get_team_home_or_away(batter_team)=='home':
+        if self.team_stats.get_team_home_or_away(batter_team) == 'home':
             park = batter_team
         else:
             park = opp_team
@@ -272,7 +273,7 @@ class StatEquations:
         opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
         batter_hr_vs_hand_percentage = self.player_stats.get_batter_hr_vs_RHP_LHP(self.year, batter, opp_pitcher_hand) /\
                                        self.player_stats.get_batter_plate_appearances_vs_RHP_LHP(self.year, batter, opp_pitcher_hand)
-        if self.team_stats.get_team_home_or_away(batter_team)=='home':
+        if self.team_stats.get_team_home_or_away(batter_team) == 'home':
             park = batter_team
         else:
             park = opp_team
@@ -357,7 +358,7 @@ class StatEquations:
         opp_pitcher = self.player_stats.get_starting_pitcher(opp_team)
         opp_pitcher_woba = self.player_stats.get_pitcher_woba_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
         opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
-        if self.team_stats.get_team_home_or_away(batter_team)=='home':
+        if self.team_stats.get_team_home_or_away(batter_team) == 'home':
             park = batter_team
         else:
             park = opp_team
@@ -416,7 +417,7 @@ class StatEquations:
         opp_pitcher = self.player_stats.get_starting_pitcher(opp_team)
         opp_pitcher_woba = self.player_stats.get_pitcher_woba_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
         opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
-        if self.team_stats.get_team_home_or_away(batter_team)=='home':
+        if self.team_stats.get_team_home_or_away(batter_team) == 'home':
             park = batter_team
         else:
             park = opp_team
@@ -451,7 +452,7 @@ class StatEquations:
 
     def get_score(self, player):
         position = self.player_stats.get_player_fielding_position(player)
-        if position=='P':
+        if position == 'P':
             return self.pitcher_expected_ip(player) + \
                    self.pitcher_points_expected_for_er(player) + \
                    self.pitcher_points_expected_for_k(player) + \
