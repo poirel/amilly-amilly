@@ -6,9 +6,9 @@ from stat_parsers.player_stats import PlayerStats
 from stat_parsers.ballpark_stats import BallparkStats
 from stat_parsers.team_stats import TeamStats
 from stat_parsers.league_stats import LeagueStats
-from stat_parsers.daily_stats import DailyStats
+#from stat_parsers.daily_stats import DailyStats
 from stat_equations import StatEquations
-
+#TODO: Removed DailyStats because we do not use it
 
 
 CAPACITY = 35000
@@ -37,12 +37,13 @@ def main():
     team_stats = TeamStats(args.stats)
     print 'League Stats...'
     league_stats = LeagueStats(args.stats)
-    print 'Daily Stats...'
-    daily_stats = DailyStats(args.stats)
+    #print 'Daily Stats...'
+    #daily_stats = DailyStats(args.stats)
 
 
     # start computing some stats here
-    eq = StatEquations(player_stats, team_stats, ballpark_stats, league_stats, daily_stats)
+    eq = StatEquations(player_stats, team_stats, ballpark_stats, league_stats)
+    #TODO: removed daily_stats from params. See stat_equations class for deets
 
     # names = ['felix hernandez',
     #          'chris tillman',
@@ -80,9 +81,9 @@ def main():
     # players.read_projections(args.projections)
     #
     # names = players.get_names()
-    # classes = [players.get_position(n) for n in names]
+    # classes = [players.get_player_fielding_position(n) for n in names]
     # values = [players.get_score(n) for n in names]
-    # weights = [players.get_salary(n) for n in names]
+    # weights = [players.get_player_salary(n) for n in names]
     #
     # if args.knapsack:
     #     knapsack = ModifiedKnapsack(names, classes, values, weights, CAPACITY, TEAM_COMP)
