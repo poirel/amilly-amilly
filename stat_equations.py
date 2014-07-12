@@ -40,14 +40,14 @@ class StatEquations:
     # PITCHERS #
     ############
 
-    def pitcher_points_expected_for_k(self, player):
+    def pitcher_points_expected_for_k(self, pitcher):
         """
         Function: pitcher_points_expected_for_k
         -----------------
         Equation to determine the total number of points expected for a pitcher's total k's
 
         Parameters
-            :param player: the pitcher whose points we are trying to determine
+            :param pitcher: the pitcher whose points we are trying to determine
 
         Formula Factors
             - k_per_ip: total_k / ip
@@ -60,28 +60,28 @@ class StatEquations:
         """
 
        #Helper variables
-        pitcherTeam = self.player_stats.get_player_team(player)
-        pitcherPitchHand = self.player_stats.get_player_throwing_hand(player)
+        pitcherTeam = self.player_stats.get_player_team(pitcher)
+        pitcherPitchHand = self.player_stats.get_player_throwing_hand(pitcher)
         oppTeam = self.team_stats.get_team_opponent(pitcherTeam)
 
        #Equations
-        k_per_ip = 1.0 * (self.player_stats.get_pitcher_total_k(self.year, player) / \
-                          (self.player_stats.get_pitcher_total_innings_pitched(self.year, player)))
+        k_per_ip = 1.0 * (self.player_stats.get_pitcher_total_k(self.year, pitcher) / \
+                          (self.player_stats.get_pitcher_total_innings_pitched(self.year, pitcher)))
 
         opp_team_k_percent_mult = 1.0 * ((self.team_stats.get_team_k_vs_RHP_LHP(self.year, oppTeam, pitcherPitchHand) /
                             self.team_stats.get_team_pa_vs_RHP_LHP(self.year, oppTeam, pitcherPitchHand)) / \
                            self.league_stats.get_league_k_percentage(self.year))
 
-        return (k_per_ip) * self.pitcher_expected_ip(player) * (opp_team_k_percent_mult)
+        return k_per_ip * self.pitcher_expected_ip(pitcher) * opp_team_k_percent_mult
 
-    def pitcher_expected_ip(self, player):
+    def pitcher_expected_ip(self, pitcher):
         """
         Function: pitcher_expected_ip
         -----------------
         Equation to determine the total number of points expected for a pitcher's total ip
 
         Parameters
-            :param player: the pitcher whose points we are trying to determine
+            :param pitcher: the pitcher whose points we are trying to determine
 
         Formula Factors
             - expected_ip: total_ip / total_games_started
@@ -91,14 +91,14 @@ class StatEquations:
 
         :return expected_ip
         """
-        return 1.0 * (self.player_stats.get_pitcher_total_innings_pitched(self.year, player) /
-                      self.player_stats.get_pitcher_total_games_started(self.year, player))
+        return 1.0 * (self.player_stats.get_pitcher_total_innings_pitched(self.year, pitcher) /
+                      self.player_stats.get_pitcher_total_games_started(self.year, pitcher))
 
-    def pitcher_points_expected_for_win(self, player):
+    def pitcher_points_expected_for_win(self, pitcher):
         # TODO: need vegas lines
         return 2
 
-    def pitcher_points_expected_for_er(self, player):
+    def pitcher_points_expected_for_er(self, pitcher):
         """
         Function: pitcher_points_expected_for_er
         -----------------
@@ -106,7 +106,7 @@ class StatEquations:
         This equation should return negative values
 
         Parameters
-            :param player: the pitcher whose points we are trying to determine
+            :param pitcher: the pitcher whose points we are trying to determine
 
         Formula Factors
             - xfip: value normalized to ERA
@@ -120,24 +120,24 @@ class StatEquations:
         """
 
         #Helper variables
-        pitcher_team = self.player_stats.get_player_team(player)
+        pitcher_team = self.player_stats.get_player_team(pitcher)
         opp_team = self.team_stats.get_team_opponent(pitcher_team)
         pitcher_loc = self.team_stats.get_team_home_or_away(pitcher_team)
-        pitcher_hand = self.player_stats.get_player_throwing_hand(player)
+        pitcher_hand = self.player_stats.get_player_throwing_hand(pitcher)
         if pitcher_loc=='home':
             park_team = pitcher_team
         else:
             park_team = opp_team
 
         #Variables
-        xfip = self.player_stats.get_pitcher_xfip_allowed(self.year, player, pitcher_loc)
+        xfip = self.player_stats.get_pitcher_xfip_allowed(self.year, pitcher, pitcher_loc)
 
         park_factor = self.ballpark_stats.get_ballpark_factor_overall(park_team)
 
         pitcher_hand_hits_mult = 1.0 * self.team_stats.get_team_woba_vs_RHP_LHP(self.year, opp_team, pitcher_hand) / \
                             self.league_stats.get_league_woba(self.year)
 
-        return -1.0 * xfip * park_factor * pitcher_hand_hits_mult * (self.pitcher_expected_ip(player)/9)
+        return -1.0 * xfip * park_factor * pitcher_hand_hits_mult * (self.pitcher_expected_ip(pitcher)/9)
 
     ###########
     # BATTERS #
