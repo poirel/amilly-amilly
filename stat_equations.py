@@ -282,7 +282,7 @@ class StatEquations:
         batter_hr_percentage = 1.0 * self.player_stats.get_batter_hr_total(self.year, batter) /\
                                self.player_stats.get_batter_ab_total(self.year, batter)
         
-        #TODO: expected at bats should come from a batter's lineup position
+        #TODO: expected at bats should come from a batters lineup position
         exp_ab = 1.0 * self.player_stats.get_batter_ab_total(self.year, batter) /\
                  self.player_stats.get_batter_games_played_total(self.year, batter)
 
