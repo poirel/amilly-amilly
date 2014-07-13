@@ -251,7 +251,7 @@ class StatEquations:
 
         Formula Factors
             - batter_hr_percentage: hr / pa
-            - exp_pa: pa / g
+            - exp_ab: ab / g
 
         Formula Multipliers
             - pitcher_eff: pitcher hr % bs RHB/LHB / league hr percent
@@ -280,10 +280,10 @@ class StatEquations:
 
         #Equations
         batter_hr_percentage = 1.0 * self.player_stats.get_batter_hr_total(self.year, batter) /\
-                               self.player_stats.get_batter_pa_total(self.year, batter)
+                               self.player_stats.get_batter_ab_total(self.year, batter)
         
-        #TODO: expected at bats should come from a batter's lineup position...but this is PA
-        exp_pa = 1.0 * self.player_stats.get_batter_pa_total(self.year, batter) /\
+        #TODO: expected at bats should come from a batter's lineup position
+        exp_ab = 1.0 * self.player_stats.get_batter_ab_total(self.year, batter) /\
                  self.player_stats.get_batter_games_played_total(self.year, batter)
 
         pitcher_eff = opp_pitcher_hr_percentage / league_hr_percentage
@@ -292,7 +292,8 @@ class StatEquations:
 
         park_factor = self.ballpark_stats.get_ballpark_factor_homerun(park, batter_hand)
 
-        return 4.0 * batter_hr_percentage * exp_pa * pitcher_eff * batter_eff * park_factor
+        #TODO: Do we want the 'batter_hr_percentage' to be vs RHP/LHP since we have a batter_eff multiplier?
+        return 4.0 * batter_hr_percentage * exp_ab * pitcher_eff * batter_eff * park_factor
 
     def batter_points_expected_for_sb(self, batter):
         """
