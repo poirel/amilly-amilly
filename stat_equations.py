@@ -256,7 +256,7 @@ class StatEquations:
         Formula Multipliers
             - pitcher_eff: pitcher hr % bs RHB/LHB / league hr percent
             - batter_eff: hr % vs RHP/LHP / league hr percent
-            - park_factor: rotowire facotr for HRs
+            - park_factor: rotowire factor for HRs
 
         :return 4.0 * batter_hr_percentage * exp_pa * pitcher_eff * batter_eff * park_factor
         """
@@ -292,7 +292,6 @@ class StatEquations:
 
         park_factor = self.ballpark_stats.get_ballpark_factor_homerun(park, batter_hand)
 
-        #TODO: Do we want the 'batter_hr_percentage' to be vs RHP/LHP since we have a batter_eff multiplier?
         return 4.0 * batter_hr_percentage * exp_ab * pitcher_eff * batter_eff * park_factor
 
     def batter_points_expected_for_sb(self, batter):
@@ -316,7 +315,7 @@ class StatEquations:
         #Helper Variables
         batter_team = self.player_stats.get_player_team(batter)
         opp_team = self.team_stats.get_team_opponent(batter_team)
-        team_sb_allowed_percentage = 1.0 * self.team_stats.get_team_sb_allowed(self.year, opp_team) /\
+        oppTeam_sb_allowed_percentage = 1.0 * self.team_stats.get_team_sb_allowed(self.year, opp_team) /\
                              (self.team_stats.get_team_sb_allowed(self.year, opp_team) + self.team_stats.get_team_cs_fielding(self.year, opp_team))
         league_sb_allowed_percentage =  1.0 * self.league_stats.get_league_stolen_bases(self.year) /\
                                 (self.league_stats.get_league_stolen_bases(self.year) + self.league_stats.get_league_caught_stealing(self.year))
@@ -325,9 +324,9 @@ class StatEquations:
         batter_sb_per_game = 1.0 * self.player_stats.get_batter_sb_total(self.year, batter) /\
                              self.player_stats.get_batter_games_played_total(self.year, batter)
 
-        team_eff = team_sb_allowed_percentage / league_sb_allowed_percentage
+        oppTeam_eff = oppTeam_sb_allowed_percentage / league_sb_allowed_percentage
 
-        return 2.0 * batter_sb_per_game * team_eff
+        return 2.0 * batter_sb_per_game * oppTeam_eff
 
     def batter_points_expected_for_runs(self, batter):
         """
