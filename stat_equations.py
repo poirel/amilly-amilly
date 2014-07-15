@@ -326,6 +326,7 @@ class StatEquations:
 
         oppTeam_eff = oppTeam_sb_allowed_percentage / league_sb_allowed_percentage
 
+        #TODO: need a factor so we consider how often teams try to steal against an opponent (ie might have a high percentage sb allowed, but only 3 attempts against
         return 2.0 * batter_sb_per_game * oppTeam_eff
 
     def batter_points_expected_for_runs(self, batter):
