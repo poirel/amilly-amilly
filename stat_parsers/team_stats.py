@@ -415,7 +415,7 @@ class TeamStats:
 
         :return nothing
         """
-        infile = '%s/Test Data/Salaries/Fanduel- 6.3.2014 Salaries.csv' %(self.statsDir)
+        infile = '%s/Test Data/Salaries/2014-06-28-fanduel-salaries.csv' %(self.statsDir)
         reader = csv.reader(open(infile), quotechar='"')
         for items in reader:
             away, home = items[4].split('@')
