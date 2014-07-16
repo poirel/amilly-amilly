@@ -307,7 +307,8 @@ class StatEquations:
             - sb per game = sb / g
 
         Formula Multipliers
-            - team_eff: team sb % allowed / league sb % allowed
+            - oppTeam_sb_allowed_eff: team sb % allowed / league sb % allowed
+            - oppTeam_sb_attempts_allowed_eff: team sb attempt against / league avg
 
         :return 2.0 * batter_sb_per_game * team_eff
         """
@@ -319,15 +320,18 @@ class StatEquations:
                              (self.team_stats.get_team_sb_allowed(self.year, opp_team) + self.team_stats.get_team_cs_fielding(self.year, opp_team))
         league_sb_allowed_percentage =  1.0 * self.league_stats.get_league_stolen_bases(self.year) /\
                                 (self.league_stats.get_league_stolen_bases(self.year) + self.league_stats.get_league_caught_stealing(self.year))
+        oppTeam_sb_attempts_against = 1.0 * (self.team_stats.get_team_sb_allowed(self.year, opp_team) + self.team_stats.get_team_cs_fielding(self.year,opp_team))
+        league_sb_attempts_against_avg = 1.0 * (self.league_stats.get_league_stolen_bases(self.year) + self.league_stats.get_league_caught_stealing(self.year)) / 30
         
         #Equations
         batter_sb_per_game = 1.0 * self.player_stats.get_batter_sb_total(self.year, batter) /\
                              self.player_stats.get_batter_games_played_total(self.year, batter)
 
-        oppTeam_eff = oppTeam_sb_allowed_percentage / league_sb_allowed_percentage
+        oppTeam_sb_allowed_eff = oppTeam_sb_allowed_percentage / league_sb_allowed_percentage
 
-        #TODO: need a factor so we consider how often teams try to steal against an opponent (ie might have a high percentage sb allowed, but only 3 attempts against
-        return 2.0 * batter_sb_per_game * oppTeam_eff
+        oppTeam_sb_attempts_allowed_eff = 1.0 * oppTeam_sb_attempts_against / league_sb_attempts_against_avg
+
+        return 2.0 * batter_sb_per_game * oppTeam_sb_allowed_eff * oppTeam_sb_attempts_allowed_eff
 
     def batter_points_expected_for_runs(self, batter):
         """
