@@ -843,7 +843,9 @@ class PlayerStats:
         :return nothing
         """
         try:
-            date = time.strftime('%Y-%m-%d')
+            #TODO: uncomment the date below so we have the active date
+            #date = time.strftime('%Y-%m-%d')
+            date = '2014-06-28'
             # TODO: this is a daily stat
             infile = '%s/Daily/%s-fanduel-salaries.csv' %(self.statsDir, date)
             reader = csv.reader(open(infile), quotechar='"')
@@ -868,7 +870,7 @@ class PlayerStats:
             self.stats[player]['starting'] = status
 
             if status=='P':
-                team = self.get_team(player)
+                team = self.get_player_team(player)
                 self.starting_pitchers[team] = player
 
     def _clean_salary(self, salary):
