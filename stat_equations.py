@@ -94,12 +94,14 @@ class StatEquations:
 
         :return expected_ip
         """
-        if self.player_stats.get_pitcher_total_games_started(self.year, pitcher) == 0:
+        if self.player_stats.get_pitcher_total_games_started(self.year, pitcher) > 0:
+            return 1.0 * (self.player_stats.get_pitcher_total_innings_pitched(self.year, pitcher) /
+                      self.player_stats.get_pitcher_total_games_started(self.year, pitcher))
+        elif self.player_stats.get_pitcher_total_games_started(self.year, pitcher) == 0:
             return 1.0 * (self.player_stats.get_pitcher_total_innings_pitched(self.year, pitcher) /
                       self.player_stats.get_pitcher_total_games_played(self.year, pitcher))
         else:
-            return 1.0 * (self.player_stats.get_pitcher_total_innings_pitched(self.year, pitcher) /
-                      self.player_stats.get_pitcher_total_games_started(self.year, pitcher))
+            return 1.0
 
     def pitcher_points_expected_for_win(self, pitcher):
         # TODO: need vegas lines
