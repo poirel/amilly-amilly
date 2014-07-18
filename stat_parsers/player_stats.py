@@ -937,8 +937,6 @@ class PlayerStats:
         return self.stats[player]['salary']
 
     def get_player_starting_status(self, player):
-        #TODO: Where is this used?
-
         """
         Function: get_player_starting_status
         -----------------
