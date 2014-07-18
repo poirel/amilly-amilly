@@ -307,7 +307,7 @@ class PlayerStats:
 
         :return nothing
         """
-        stats = ['gs_total', 'k_pitched_total', 'ip_total']
+        stats = ['gs_total', 'k_pitched_total', 'ip_total', 'g_total']
         years = [2013, 2014]
         for year in years:
             infile = '%s/Pitcher/%d/%d Total Pitcher Stats.csv' %(self.statsDir, year, year)
@@ -315,8 +315,26 @@ class PlayerStats:
             header = reader.next()
             for items in reader:
                 player = items[0].lower()
-                for i, stat_val in enumerate([float(x) for x in items[2:5]]):
+                for i, stat_val in enumerate([float(x) for x in items[2:6]]):
                     self.stats[player][year][stats[i]] = stat_val
+
+    def get_pitcher_total_games_played(self, year, player):
+        """
+        Function: get_pitcher_total_games_played
+        -----------------
+        Helper method for pitcher total games played
+
+        Parameters:
+            year: the year of the pitcher stats, also corresponds with file name
+            player: the pitcher whose stats we are looking for
+
+        :return pitcher total games played (g) for defined year
+
+        equations used in:
+            pitcher_points_expected_for_k
+            pitcher_expected_ip
+        """
+        return self.stats[player][year]['g_total']
 
     def get_pitcher_total_games_started(self, year, player):
         """
@@ -845,7 +863,7 @@ class PlayerStats:
         try:
             #TODO: uncomment the date below so we have the active date
             #date = time.strftime('%Y-%m-%d')
-            date = '2014-06-28'
+            date = '2014-07-17'
             # TODO: this is a daily stat
             infile = '%s/Daily/%s-fanduel-salaries.csv' %(self.statsDir, date)
             reader = csv.reader(open(infile), quotechar='"')
