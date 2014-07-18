@@ -56,25 +56,25 @@ def main():
     #     print '\t', eq.pitcher_points_expected_for_k(n)
     #     print '\t', eq.pitcher_expected_ip(n)
     #
-    names = ['mike trout',
-               'chris davis',
-               'jacoby ellsbury']
-    for n in names:
-        print n
-        print '\t hits', eq.batter_points_expected_for_hits(n)
-        print '\t walk', eq.batter_points_expected_for_walks(n)
-        print '\t hr  ', eq.batter_points_expected_for_hr(n)
-        print '\t stol', eq.batter_points_expected_for_sb(n)
-        print '\t rbis', eq.batter_points_expected_for_rbi(n)
-        print '\t runs', eq.batter_points_expected_for_runs(n)
-        print '\t total', eq.get_score(n)
+    #names = ['mike trout',
+    #           'chris davis',
+    #           'jacoby ellsbury']
+    #for n in names:
+    #    print n
+    #    print '\t hits', eq.batter_points_expected_for_hits(n)
+    #    print '\t walk', eq.batter_points_expected_for_walks(n)
+    #    print '\t hr  ', eq.batter_points_expected_for_hr(n)
+    #    print '\t stol', eq.batter_points_expected_for_sb(n)
+    #    print '\t rbis', eq.batter_points_expected_for_rbi(n)
+    #    print '\t runs', eq.batter_points_expected_for_runs(n)
+    #    print '\t total', eq.get_score(n)
 
 
-    #names = player_stats.get_active_players()
+    names = player_stats.get_active_players()
     #names = player_stats.starting_pitchers.values()
 
-    #for n in names:
-    #   print n, eq.get_score(n)
+    for n in names:
+       print n, eq.get_score(n)
 
 
     # players = PlayerSalaryScores()
