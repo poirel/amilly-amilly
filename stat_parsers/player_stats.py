@@ -11,6 +11,7 @@ This class reads in Player Stats from the following files:
     - /Stats/Batter/(YEAR)/(YEAR) Batter Stats vs (handedness).csv
     - /Stats/Batter/(YEAR)/(YEAR) Total Batter Stats.csv
     - /Stats/Daily/(DATE)-fanduel-salaries.csv
+    - /Stats/Batter/2014/7_day Batter Total Stats.csv
 
 The following stats are available:
     Batter
@@ -94,6 +95,7 @@ class PlayerStats:
         self.read_catcher_fielding_stats()
         self.read_batter_stats_vs_RHP_LHP()
         self.read_batter_stats_total()
+        self.read_batter_stats_7_day()
 
         # must be read after rosters
         self.read_fanduel_positions_and_salaries()
@@ -101,8 +103,9 @@ class PlayerStats:
         # print len([name for name, stats in self.stats.items() if 'bats' in stats])
         # print len([name for name, stats in self.stats.items() if 2014 in stats])
         # print len([name for name, stats in self.stats.items() if 2013 in stats])
+        # print len([name for name, stats in self.stats.items() if '7_day' in stats])
 
-        # self.printStats()
+        self.printStats()
         # self.printPitchers()
 
     def printStats(self):
@@ -1182,3 +1185,235 @@ class PlayerStats:
             if v.get('starting', False) and (v.get('team', None) in self.starting_pitchers):
                 players.append(k)
         return players
+
+    def read_batter_stats_7_day(self):
+        """
+        Function:read_batter_stats_7_day
+        -----------------
+        Reads batter stats from the following directory:
+
+            (statsDir from _init_)/Batter/2014/7_day Batter Total Stats.csv
+
+        Parameters:
+            :param none
+
+        :return nothing
+        """
+        stats = ['ab_7_day',
+                 'h_7_day',
+                 '1b_7_day',
+                 '2b_7_day',
+                 '3b_7_day',
+                 'hr_7_day',
+                 'g_7_day',
+                 'pa_7_day',
+                 'bb_percent_7_day',
+                 'avg_7_day',
+                 'woba_7_day']
+        infile = '%s/Batter/2014/7_day Batter Total Stats.csv' %(self.statsDir)
+        reader = csv.reader(open(infile), quotechar='"')
+        header = reader.next()
+        for items in reader:
+            player = items[0].lower()
+            for i, stat_val in enumerate([float(x.rstrip('%')) for x in items[2:13]]):
+                if stats[i]=='bb_percent_7_day':
+                    stat_val/=100.0
+                self.stats[player]['7_day'][stats[i]] = stat_val
+
+    def get_batter_ab_7_day(self, player):
+        """
+        Function: get_batter_ab_7_day
+        -----------------
+        Helper method for the 7_day at bats (ab) for a specified batter
+
+        Parameters:
+            :param player: the batter whose stats we are looking for
+
+        :return batter 7_day at bats for the specified year
+
+        equations used in:
+            batter_points_expected_for_hits
+            batter_points_expected_for_walks
+            batter_points_expected_for_hr
+            batter_points_expected_for_runs
+            batter_points_expected_for_rbi
+        """
+        return self.stats[player]['7_day']['ab_7_day']
+
+    def get_batter_hits_7_day(self, player):
+        """
+        Function: get_batter_hits_7_day
+        -----------------
+        Helper method for the 7_day hits (1B,2B,3B,HR) for a specified batter
+
+        Parameters:
+            :param player: the batter whose stats we are looking for
+
+        :return batter 7_day hits for the specified year
+
+        equations used in:
+            batter_points_expected_for_hits
+        """
+        return self.stats[player]['7_day']['h_7_day']
+
+    def get_batter_1b_7_day(self, player):
+        """
+        Function: get_batter_1b_7_day
+        -----------------
+        Helper method for the 7_day singles (1B) for a specified batter
+
+        Parameters:
+            :param player: the batter whose stats we are looking for
+
+        :return batter 7_day singles (1B) for the specified year
+
+        equations used in:
+            batter_points_expected_for_hits
+        """
+        return self.stats[player]['7_day']['1b_7_day']
+
+    def get_batter_2b_7_day(self, player):
+        """
+        Function: get_batter_2b_7_day
+        -----------------
+        Helper method for the 7_day doubles (2B) for a specified batter
+
+        Parameters:
+            :param player: the batter whose stats we are looking for
+
+        :return batter 7_day doubles (2B) for the specified year
+
+        equations used in:
+            batter_points_expected_for_hits
+        """
+        return self.stats[player]['7_day']['2b_7_day']
+
+    def get_batter_3b_7_day(self, player):
+        """
+        Function: get_batter_3b_7_day
+        -----------------
+        Helper method for the 7_day triples (3B) for a specified batter
+
+        Parameters:
+            :param player: the batter whose stats we are looking for
+
+        :return batter 7_day triples (3B) for the specified year
+
+        equations used in:
+            batter_points_expected_for_hits
+        """
+        return self.stats[player]['7_day']['3b_7_day']
+
+    def get_batter_hr_7_day(self, player):
+        """
+        Function: get_batter_hr_7_day
+        -----------------
+        Helper method for the 7_day home runs (hr) for a specified batter
+
+        Parameters:
+            :param player: the batter whose stats we are looking for
+
+        :return batter 7_day home runs for the specified year
+
+        equations used in:
+            batter_points_expected_for_hits
+            batter_points_expected_for_hr
+            batter_points_expected_for_runs
+            batter_points_expected_for_rbi
+        """
+        return self.stats[player]['7_day']['hr_7_day']
+
+    def get_batter_games_played_7_day(self, player):
+        """
+        Function: get_batter_games_played_7_day
+        -----------------
+        Helper method for the 7_day games played (g) for a specified batter
+
+        Parameters:
+            :param player: the batter whose stats we are looking for
+
+        :return batter 7_day games played for the specified year
+
+        equations used in:
+            batter_points_expected_for_hits
+            batter_points_expected_for_walks
+            batter_points_expected_for_hr
+            batter_points_expected_for_runs
+            batter_points_expected_for_rbi
+        """
+        return self.stats[player]['7_day']['g_7_day']
+
+    def get_batter_pa_7_day(self, player):
+        """
+        Function: get_batter_pa_7_day
+        -----------------
+        Helper method for the 7_day plate appearances (pa) for a specified batter
+
+        Note: PA = AB + BB
+
+        Parameters:
+            :param player: the batter whose stats we are looking for
+
+        :return batter 7_day plate appearances for the specified year
+
+        equations used in:
+            batter_points_expected_for_hr
+            batter_points_expected_for_runs
+            batter_points_expected_for_rbi
+        """
+        return self.stats[player]['7_day']['pa_7_day']
+
+    def get_batter_bb_percent_7_day(self, player):
+        """
+        Function: get_batter_bb_percent_7_day
+        -----------------
+        Helper method for the 7_day walk percentage (BB%) for a specified batter
+
+        Parameters:
+            :param player: the batter whose stats we are looking for
+
+        :return batter 7_day walk percentage for the specified year
+
+        equations used in:
+            batter_points_expected_for_walks
+            batter_points_expected_for_runs
+            batter_points_expected_for_rbi
+        """
+        return self.stats[player]['7_day']['bb_percent_7_day']
+
+    def get_batter_ba_7_day(self, player):
+        """
+        Function: get_batter_ba_7_day
+        -----------------
+        Helper method for the 7_day batting average (ba) for a specified batter
+
+        Note: BA = H / AB
+
+        Parameters:
+            :param player: the batter whose stats we are looking for
+
+        :return batter 7_day batting average for the specified year
+
+        equations used in:
+            batter_points_expected_for_runs
+            batter_points_expected_for_rbi
+        """
+        return self.stats[player]['7_day']['ba_7_day']
+
+    def get_batter_woba_7_day(self, player):
+        """
+        Function: get_batter_woba_7_day
+        -----------------
+        Helper method for the 7_day wOBA for the specified player
+
+        Parameters:
+            :param player: the batter whose stats we are looking for
+
+        :return batter 7_day wOBA for the specified player
+
+        equations used in:
+            batter_points_expected_for_runs
+            batter_points_expected_for_rbi
+            batter_points_expected_for_hits
+        """
+        return self.stats[player]['7_day']['woba_7_day']
