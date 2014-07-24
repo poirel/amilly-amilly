@@ -70,11 +70,11 @@ def main():
     #    print '\t total', eq.get_score(n)
 
 
-    names = player_stats.get_active_players()
+    #names = player_stats.get_active_players()
     #names = player_stats.starting_pitchers.values()
 
-    for n in names:
-       print n, eq.get_score(n)
+    #for n in names:
+       #print n, eq.get_score(n)
 
 
     # players = PlayerSalaryScores()
