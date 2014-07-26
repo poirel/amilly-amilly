@@ -400,9 +400,9 @@ class TeamStats:
             return None
 
     def read_daily_matchups(self):
-        # TODO: hard-coded daily stats
-        # TODO: need to get from the same fanduel stats we get in player_stats.read_fanduel_positions_and_salaries
         """
+        DEPRECATED: USE FOR TESTING ONLY
+
         Function: read_daily_matchups
         -----------------
         Reads hard coded daily matchup info from the following directory:

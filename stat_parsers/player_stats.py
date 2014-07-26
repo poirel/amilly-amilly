@@ -88,7 +88,6 @@ class PlayerStats:
         self.stats = defaultdict(lambda: defaultdict( lambda: defaultdict( lambda: defaultdict (dict))))
         self.starting_pitchers = {}
 
-        self.read_rosters()
         self.read_pitcher_stats_home_away()
         self.read_pitcher_stats_vs_RHB_LHB()
         self.read_pitcher_stats_total()
@@ -97,16 +96,10 @@ class PlayerStats:
         self.read_batter_stats_total()
         self.read_batter_stats_7_day()
 
-        # must be read after rosters
-        self.read_fanduel_positions_and_salaries()
-
         # print len([name for name, stats in self.stats.items() if 'bats' in stats])
         # print len([name for name, stats in self.stats.items() if 2014 in stats])
         # print len([name for name, stats in self.stats.items() if 2013 in stats])
         # print len([name for name, stats in self.stats.items() if '7_day' in stats])
-
-        self.printStats()
-        # self.printPitchers()
 
     def printStats(self):
         """
@@ -960,6 +953,8 @@ class PlayerStats:
 
     def read_rosters(self):
         """
+        DEPRECATED: DO NOT USE
+
         Function:read_rosters
         -----------------
         Reads team rosters from ESPN from the following URL:
