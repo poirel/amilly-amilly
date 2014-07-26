@@ -20,6 +20,7 @@ TEAM_COMP = {'P': 1,
              '3B': 1,
              'OF': 3}
 
+
 def main():
     parser = argparse.ArgumentParser(description='Find dat team.')
     parser.add_argument('salaries', help='File containing player salaries and positions.')
@@ -39,7 +40,6 @@ def main():
     league_stats = LeagueStats(args.stats)
     #print 'Daily Stats...'
     #daily_stats = DailyStats(args.stats)
-
 
     # start computing some stats here
     print 'Computing Equations...'
@@ -69,13 +69,11 @@ def main():
     #    print '\t runs', eq.batter_points_expected_for_runs(n)
     #    print '\t total', eq.get_score(n)
 
-
     #names = player_stats.get_active_players()
     #names = player_stats.starting_pitchers.values()
 
     #for n in names:
        #print n, eq.get_score(n)
-
 
     # players = PlayerSalaryScores()
     # players.read_positions_and_salaries(args.salaries)
