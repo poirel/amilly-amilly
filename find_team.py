@@ -269,10 +269,13 @@ def main():
         #print 'Calculating ', p
         classes.append(player_stats.get_player_fielding_position(p))
         values.append(eq.get_score(p))
+        #Print Statements for getting players and scores in csv format
+        '''
         if player_stats.get_player_fielding_position(p) == 'P':
             eq.get_score(p),',',eq.pitcher_points_expected_for_win(p),',',eq.pitcher_points_expected_for_er(p),',',eq.pitcher_points_expected_for_k(p),',',eq.pitcher_expected_ip(p), ','
         else:
             print p,',',eq.get_score(p),',',eq.batter_points_expected_for_hits(p),',',eq.batter_points_expected_for_hr(p),',',eq.batter_points_expected_for_rbi(p),',',eq.batter_points_expected_for_runs(p),',',eq.batter_points_expected_for_sb(p),',',eq.batter_points_expected_for_walks(p),','
+        '''
         weights.append(player_stats.get_player_salary(p))
 
     if args.mcmc:
