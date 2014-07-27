@@ -99,6 +99,10 @@ def parseRotoGrinders(player_stats, team_stats):
                     player_stats.set_player_team(full_name,2014,'NYY')
                 elif full_name == 'sam fuld':
                     player_stats.set_player_team(full_name,2014,'MIN')
+                elif full_name == 'kendrys morales':
+                    player_stats.set_player_team(full_name,2014,'SEA')
+                elif full_name == 'yangervis solarte':
+                    player_stats.set_player_team(full_name,2014,'SDP')
 
 
         # update pitcher stats
