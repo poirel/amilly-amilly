@@ -259,12 +259,8 @@ def main():
     #     knapsack = ModifiedKnapsack(names, classes, values, weights, CAPACITY, TEAM_COMP)
     #    #knapsack.find_solution()
 
-
     from mcmc import TeamMCMC
-    #TODO: fix this shit
     names = list(player_stats.get_active_players())
-    #for p in ['chris capuano', 'logan darnell', 'chase headley','kendrys morales', 'dan uggla', 'nick hundley', 'grady sizemore', 'yangervis solarte']:
-        #names.remove(p)
     classes = []
     values = []
     weights = []
@@ -274,21 +270,9 @@ def main():
         classes.append(player_stats.get_player_fielding_position(p))
         values.append(eq.get_score(p))
         if player_stats.get_player_fielding_position(p) == 'P':
-            #print '\tTotal Score:', eq.get_score(p)
-            #print '\tWin:', eq.pitcher_points_expected_for_win(p)
-            #print '\tER', eq.pitcher_points_expected_for_er(p)
-            #print '\tIP', eq.pitcher_points_expected_for_k(p)
-            #print '\tK ', eq.pitcher_expected_ip(p)
-            print p, '\tSalary ---', player_stats.get_player_salary(p)
+            eq.get_score(p),',',eq.pitcher_points_expected_for_win(p),',',eq.pitcher_points_expected_for_er(p),',',eq.pitcher_points_expected_for_k(p),',',eq.pitcher_expected_ip(p), ','
         else:
-            #print '\tTotal Score:', eq.get_score(p)
-            #print '\tHits:', eq.batter_points_expected_for_hits(p)
-            #print '\tHR:  ', eq.batter_points_expected_for_hr(p)
-            #print '\tRBI: ', eq.batter_points_expected_for_rbi(p)
-            #print '\tRuns:', eq.batter_points_expected_for_runs(p)
-            #print '\tSB:  ', eq.batter_points_expected_for_sb(p)
-            #print '\tBB:  ', eq.batter_points_expected_for_walks(p)
-            print p, '\tSalary ---', player_stats.get_player_salary(p)
+            print p,',',eq.get_score(p),',',eq.batter_points_expected_for_hits(p),',',eq.batter_points_expected_for_hr(p),',',eq.batter_points_expected_for_rbi(p),',',eq.batter_points_expected_for_runs(p),',',eq.batter_points_expected_for_sb(p),',',eq.batter_points_expected_for_walks(p),','
         weights.append(player_stats.get_player_salary(p))
 
     if args.mcmc:
