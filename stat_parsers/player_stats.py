@@ -316,7 +316,8 @@ class PlayerStats:
                 self.stats[player][year]['team'] = get_team_by_mascot(items[1])
                 for i, stat_val in enumerate([float(x) for x in items[2:6]]):
                     #TODO: REMOVE THIS -- This is to help with pitchers without 2014 stats
-                    self.stats[player][2014][stats[i]] = 0
+                    if year == 2013:
+                        self.stats[player][2014][stats[i]] = 0
                     self.stats[player][year][stats[i]] = stat_val
 
     def get_pitcher_total_games_played(self, year, player):
@@ -851,50 +852,6 @@ class PlayerStats:
             not used yet...might not use
         """
         return self.stats[player][year]['cs_total']
-
-    def read_fanduel_positions_and_salaries(self):
-        """
-        Function:read_fanduel_positions_and_salaries
-        -----------------
-        Reads fanduel info from the following directory:
-
-            (statsDir from _init_)/Daily/(DATE)-fanduel-salaries.csv
-
-        Parameters:
-            :param none
-
-        :return nothing
-        """
-        try:
-            #TODO: uncomment the date below so we have the active date
-            #date = time.strftime('%Y-%m-%d')
-            date = '2014-07-17'
-            # TODO: this is a daily stat
-            infile = '%s/Daily/%s-fanduel-salaries.csv' %(self.statsDir, date)
-            reader = csv.reader(open(infile), quotechar='"')
-        except IOError:
-            print "Salaries don't exist, dipshit."
-        for items in reader:
-            # Sample entry:
-            # OF,Colby RasmusDL,2.3,37,TAM@TOR,"$3,500 ",Add
-            position = items[0]
-            player, status = self._clean_name(items[1])
-            player = self._normalize_name(player)
-            salary = self._clean_salary(items[5])
-            self.stats[player]['fielding_position'] = position
-            self.stats[player]['salary'] = salary
-
-            # TODO: change to None when we have real lineups
-            starting = True
-            if status=='P':
-                starting = True
-            if status=='DL':
-                starting = False
-            self.stats[player]['starting'] = status
-
-            if status=='P':
-                team = self.get_player_team(player)
-                self.starting_pitchers[team] = player
 
     def set_player_fielding_position(self, player, position):
         self.stats[player]['fielding_position'] = position
