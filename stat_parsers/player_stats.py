@@ -605,7 +605,8 @@ class PlayerStats:
                     if stats[i]=='bb_percent_total':
                         stat_val/=100.0
                     #TODO: REMOVE THIS -- This is to help with batters without 2014 stats
-                    self.stats[player][2014][stats[i]] = 0
+                    if year == 2013:
+                        self.stats[player][2014][stats[i]] = 0
                     self.stats[player][year][stats[i]] = stat_val
 
     def get_batter_1b_total(self, year, player):
