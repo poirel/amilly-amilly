@@ -93,6 +93,14 @@ def parseRotoGrinders(player_stats, team_stats):
                 player_stats.set_player_fielding_position(full_name, p['position'].upper())
                 player_stats.set_player_active(full_name)
 
+                #Accounting for no teams in FanGraphs
+                #TODO: Fix this
+                if full_name == 'chase headley':
+                    player_stats.set_player_team(full_name,2014,'NYY')
+                elif full_name == 'sam fuld':
+                    player_stats.set_player_team(full_name,2014,'MIN')
+
+
         # update pitcher stats
         for i, pitcher in enumerate(pitchers):
             #Normalizing pitcher names between FanGraphs and RotoGrinder
@@ -260,14 +268,24 @@ def main():
     values = []
     weights = []
     for i,p in enumerate(names,1):
-        #print '%d/%d %s' %(i, len(names), p)
+        print '%d/%d %s' %(i, len(names), p)
+        print 'Calculating ', p
         classes.append(player_stats.get_player_fielding_position(p))
         values.append(eq.get_score(p))
-        print p,eq.get_score(p)
-        print '\tWin:', eq.pitcher_points_expected_for_win(p)
-        print '\tER', eq.pitcher_points_expected_for_er(p)
-        print '\tIP', eq.pitcher_points_expected_for_k(p)
-        print '\tK ', eq.pitcher_expected_ip(p)
+        if player_stats.get_player_fielding_position(p) == 'P':
+            print '\tTotal Score:', eq.get_score(p)
+            print '\tWin:', eq.pitcher_points_expected_for_win(p)
+            print '\tER', eq.pitcher_points_expected_for_er(p)
+            print '\tIP', eq.pitcher_points_expected_for_k(p)
+            print '\tK ', eq.pitcher_expected_ip(p)
+        else:
+            print '\tTotal Score:', eq.get_score(p)
+            print '\tHits:', eq.batter_points_expected_for_hits(p)
+            print '\tHR:  ', eq.batter_points_expected_for_hr(p)
+            print '\tRBI: ', eq.batter_points_expected_for_rbi(p)
+            print '\tRuns:', eq.batter_points_expected_for_runs(p)
+            print '\tSB:  ', eq.batter_points_expected_for_sb(p)
+            print '\tBB:  ', eq.batter_points_expected_for_walks(p)
         weights.append(player_stats.get_player_salary(p))
 
     if args.mcmc:
