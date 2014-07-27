@@ -57,7 +57,6 @@ The following stats are available:
 Source of stats: Fangraphs & FanDuel salary scrape
 """
 
-import time
 from team_stats import *
 from collections import defaultdict
 import csv
@@ -66,6 +65,9 @@ import urllib2
 import re
 from bs4 import BeautifulSoup
 import sys
+
+
+from team_stats import get_team_by_mascot
 
 class PlayerStats:
 
@@ -311,7 +313,10 @@ class PlayerStats:
             header = reader.next()
             for items in reader:
                 player = items[0].lower()
+                self.stats[player][year]['team'] = get_team_by_mascot(items[1])
                 for i, stat_val in enumerate([float(x) for x in items[2:6]]):
+                    #TODO: REMOVE THIS
+                    self.stats[player][2014][stats[i]] = 0
                     self.stats[player][year][stats[i]] = stat_val
 
     def get_pitcher_total_games_played(self, year, player):
@@ -595,6 +600,7 @@ class PlayerStats:
             header = reader.next()
             for items in reader:
                 player = items[0].lower()
+                self.stats[player][year]['team'] = get_team_by_mascot(items[1])
                 for i, stat_val in enumerate([float(x.rstrip('%')) for x in items[2:15]]):
                     if stats[i]=='bb_percent_total':
                         stat_val/=100.0
@@ -887,6 +893,12 @@ class PlayerStats:
                 team = self.get_player_team(player)
                 self.starting_pitchers[team] = player
 
+    def set_player_fielding_position(self, player, position):
+        self.stats[player]['fielding_position'] = position
+
+    def set_player_salary(self, player, salary):
+        self.stats[player]['salary'] = salary
+
     def _clean_salary(self, salary):
         """
         Function:_clean_salary
@@ -1005,6 +1017,9 @@ class PlayerStats:
                 self.stats[player]['bats'] = handMap[p[3]]
                 self.stats[player]['throws'] = handMap[p[4]]
 
+    def set_player_throwing_hand(self, player, hand):
+        self.stats[player]['throws'] = hand
+
     def get_player_throwing_hand(self, player):
         """
         Function: get_player_throwing_hand
@@ -1028,6 +1043,9 @@ class PlayerStats:
         """
         return self.stats[player]['throws']
 
+    def set_player_batting_hand(self, player, hand):
+         self.stats[player]['bats'] = hand
+
     def get_player_batting_hand(self, player):
         """
         Function: get_player_batting_hand
@@ -1049,6 +1067,9 @@ class PlayerStats:
            batter_points_expected_for_runs
            batter_points_expected_for_rbi
         """
+        #TODO: Hack for today
+        if self.stats[player]['bats'] == 'switch' or 'both':
+            return 'right'
         return self.stats[player]['bats']
 
     def get_player_team(self, player):
@@ -1073,7 +1094,11 @@ class PlayerStats:
             batter_points_expected_for_runs
             batter_points_expected_for_rbi
         """
-        return self.stats[player]['team']
+        return self.stats[player][2014]['team']
+
+
+    def set_player_batting_position(self, player, order):
+        self.stats[player]['batting_order'] = order
 
     def get_player_batting_position(self, player):
         # TODO: not computing position right now
@@ -1093,8 +1118,11 @@ class PlayerStats:
             batter_points_expected_for_runs
             batter_points_expected_for_rbi
         """
-        return 4
+        return self.stats[player]['batting_order']
         #return randint(1, 9)
+
+    def set_starting_pitcher(self, team, pitcher):
+        self.starting_pitchers[team] = pitcher
 
     def get_starting_pitcher(self, team):
         """
@@ -1175,11 +1203,12 @@ class PlayerStats:
         """
         players = []
         for k, v in self.stats.items():
-            # TODO: hack to avoid players when we don't know their starting pitcher.
-            # this should not be an issue when we read real rosters.
-            if v.get('starting', False) and (v.get('team', None) in self.starting_pitchers):
+            if v['status']==True:
                 players.append(k)
         return players
+
+    def set_player_active(self, player):
+        self.stats[player]['status'] = True
 
     def read_batter_stats_7_day(self):
         """
@@ -1412,3 +1441,25 @@ class PlayerStats:
             batter_points_expected_for_hits
         """
         return self.stats[player]['7_day']['woba_7_day']
+
+
+    def get_player_full_name(self, first_initial, last_name, team):
+        for p, pstats in self.stats.items():
+            if first_initial.lower() != p[0]:
+                continue
+            if last_name.lower() != p.split()[-1]:
+                continue
+            if team != pstats[2014]['team']:
+                continue
+            return p
+        return None
+
+
+    def get_player_full_name_simple(self, first_initial, last_name):
+        for p, pstats in self.stats.items():
+            if first_initial.lower() != p[0]:
+                continue
+            if last_name.lower() != p.split()[-1]:
+                continue
+            return p
+        return None

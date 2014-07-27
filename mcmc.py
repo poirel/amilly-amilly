@@ -41,6 +41,7 @@ class TeamMCMC:
         self.current_cost -= self.costs[name]
 
     def make_random_team(self):
+        print 'making random team'
         team_found = False
         self.clear_team()
         while len(self.current_team) < len(self.valid_comp):
@@ -48,7 +49,7 @@ class TeamMCMC:
             random_comp = list(self.valid_comp)
             shuffle(random_comp)
             for new_class in random_comp:
-                candidates = [name for name in self.get_available(new_class) if (self.costs[name] + self.current_cost) < self.capacity]
+                candidates = [name for name in self.get_available(new_class) if (self.costs[name] + self.current_cost) <= self.capacity]
                 if len(candidates) > 0:
                     self.add_player(choice(candidates))
 
@@ -63,7 +64,7 @@ class TeamMCMC:
         neighbors = []
         for name in self.current_team:
             for candidate in self.get_available(self.classes[name]):
-                if (self.current_cost - self.costs[name] + self.costs[candidate]) < self.capacity:
+                if (self.current_cost - self.costs[name] + self.costs[candidate]) <= self.capacity:
                     neighbors.append( (name, candidate) )
         old, new = choice(neighbors)
         return old, new
@@ -95,6 +96,7 @@ class TeamMCMC:
 
     def find_simulated_annealing_solution(self):
         for i in range(10):
+            print 'SGG',i
             self.make_random_team()
             for temp in arange(1000, 0, -0.25):
                 old_name, new_name = self.get_neighbor()

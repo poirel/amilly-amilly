@@ -18,9 +18,11 @@ This class computes the following stats:
 
 Source of stats: internal classes
 """
-
+RUN_MULTIPLIER = [0, 1.164, 1.122, 0.979, 0.946, 0.971, 0.921, 0.899, 0.927, 0.973]
+RBI_MULTIPLIER = [0, 0.726, 0.839, 1.017, 1.114, 1.038, 0.985, 0.954, 0.904, 0.879]
 
 class StatEquations:
+
 
     def __init__(self, player_stats, team_stats, ballpark_stats, league_stats):
         #TODO: removed daily_stats from params -- class is messed up and var is never used
@@ -180,8 +182,14 @@ class StatEquations:
         batter_hand = self.player_stats.get_player_batting_hand(batter)
         opp_team = self.team_stats.get_team_opponent(batter_team)
         opp_pitcher = self.player_stats.get_starting_pitcher(opp_team)
-        opp_pitcher_woba = self.player_stats.get_pitcher_woba_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
-        opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
+
+        if self.player_stats.get_pitcher_total_games_started(self.year, opp_pitcher)>0:
+            opp_pitcher_woba = self.player_stats.get_pitcher_woba_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
+            opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
+        else:
+            opp_pitcher_woba = self.league_stats.get_league_woba(self.year)
+            opp_pitcher_hand = 'right'
+
         if self.team_stats.get_team_home_or_away(batter_team) == 'home':
             park = batter_team
         else:
@@ -205,7 +213,6 @@ class StatEquations:
                          self.league_stats.get_league_woba(self.year)
 
         park_factor = self.ballpark_stats.get_ballpark_factor_batting_average(park, batter_hand)
-
         return adj_slg * exp_ab * pitcher_eff * batter_eff * park_factor
 
     def batter_points_expected_for_walks(self, batter):
@@ -232,10 +239,14 @@ class StatEquations:
         batter_hand = self.player_stats.get_player_batting_hand(batter)
         opp_team = self.team_stats.get_team_opponent(batter_team)
         opp_pitcher = self.player_stats.get_starting_pitcher(opp_team)
-        pitcher_bb_perc = 1.0 * self.player_stats.get_pitcher_bb_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand) /\
-                          self.player_stats.get_pitcher_total_batters_faced_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
         league_bb_perc = 1.0 * self.league_stats.get_league_bb(self.year) /\
-                         self.league_stats.get_league_plate_appearance(self.year)
+                 self.league_stats.get_league_plate_appearance(self.year)
+        if self.player_stats.get_pitcher_total_games_started(2014, opp_pitcher)>0:
+            pitcher_bb_perc = 1.0 * self.player_stats.get_pitcher_bb_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand) /\
+                              self.player_stats.get_pitcher_total_batters_faced_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
+        else:
+            pitcher_bb_perc = league_bb_perc
+
 
         #Equations
         #TODO: expected at bats should come from a batter's lineup position...but this is PA
@@ -274,11 +285,16 @@ class StatEquations:
         batter_hand = self.player_stats.get_player_batting_hand(batter)
         opp_team = self.team_stats.get_team_opponent(batter_team)
         opp_pitcher = self.player_stats.get_starting_pitcher(opp_team)
-        opp_pitcher_hr_percentage = 1.0 * self.player_stats.get_pitcher_hr_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand) /\
-                                    self.player_stats.get_pitcher_total_batters_faced_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
         league_hr_percentage = 1.0 * self.league_stats.get_league_homerun(self.year) /\
                                    self.league_stats.get_league_plate_appearance(self.year)
-        opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
+        if self.player_stats.get_pitcher_total_games_started(2014, opp_pitcher)>0:
+            opp_pitcher_hr_percentage = 1.0 * self.player_stats.get_pitcher_hr_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand) /\
+                                    self.player_stats.get_pitcher_total_batters_faced_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
+            opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
+        else:
+            opp_pitcher_hr_percentage = league_hr_percentage
+            opp_pitcher_hand = 'right'
+
         batter_hr_vs_hand_percentage = self.player_stats.get_batter_hr_vs_RHP_LHP(self.year, batter, opp_pitcher_hand) /\
                                        self.player_stats.get_batter_plate_appearances_vs_RHP_LHP(self.year, batter, opp_pitcher_hand)
         if self.team_stats.get_team_home_or_away(batter_team) == 'home':
@@ -369,8 +385,14 @@ class StatEquations:
         batter_hand = self.player_stats.get_player_batting_hand(batter)
         opp_team = self.team_stats.get_team_opponent(batter_team)
         opp_pitcher = self.player_stats.get_starting_pitcher(opp_team)
-        opp_pitcher_woba = self.player_stats.get_pitcher_woba_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
-        opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
+
+        if self.player_stats.get_pitcher_total_games_started(2014, opp_pitcher)>0:
+            opp_pitcher_woba = self.player_stats.get_pitcher_woba_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
+            opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
+        else:
+            opp_pitcher_woba = self.league_stats.get_league_woba(2014)
+            opp_pitcher_hand = 'right'
+
         if self.team_stats.get_team_home_or_away(batter_team) == 'home':
             park = batter_team
         else:
@@ -392,8 +414,7 @@ class StatEquations:
 
         park_factor = self.ballpark_stats.get_ballpark_factor_overall(park)
 
-        # TODO: get batting order for runs
-        batting_order_factor = 1.0
+        batting_order_factor = RUN_MULTIPLIER[self.player_stats.get_player_batting_position(batter)]
 
         team_factor = self.team_stats.get_team_runs_total(self.year, batter_team) /\
                       (self.league_stats.get_league_runs(self.year) / 30.0)
@@ -428,8 +449,14 @@ class StatEquations:
         batter_hand = self.player_stats.get_player_batting_hand(batter)
         opp_team = self.team_stats.get_team_opponent(batter_team)
         opp_pitcher = self.player_stats.get_starting_pitcher(opp_team)
-        opp_pitcher_woba = self.player_stats.get_pitcher_woba_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
-        opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
+        if self.player_stats.get_pitcher_total_games_started(2014, opp_pitcher)>0:
+            opp_pitcher_woba = self.player_stats.get_pitcher_woba_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
+            opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
+        else:
+            opp_pitcher_woba = self.league_stats.get_league_woba(2014)
+            opp_pitcher_hand = 'right'
+
+
         if self.team_stats.get_team_home_or_away(batter_team) == 'home':
             park = batter_team
         else:
@@ -451,8 +478,7 @@ class StatEquations:
 
         park_factor = self.ballpark_stats.get_ballpark_factor_overall(park)
 
-        # TODO: get batting order for runs
-        batting_order_factor = 1.0
+        batting_order_factor = RBI_MULTIPLIER[self.player_stats.get_player_batting_position(batter)]
 
         team_factor = self.team_stats.get_team_runs_total(self.year, batter_team) /\
                       (self.league_stats.get_league_runs(self.year) / 30.0)

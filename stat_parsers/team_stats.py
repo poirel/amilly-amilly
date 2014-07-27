@@ -424,6 +424,9 @@ class TeamStats:
             self.stats[home]['opponent'] = away
             self.stats[away]['opponent'] = home
 
+    def set_team_home_or_away(self, team, home_or_away):
+        self.stats[team]['home_or_away'] = home_or_away
+
     def get_team_home_or_away(self, team):
         """
         Function: get_team_home_or_away
@@ -443,6 +446,10 @@ class TeamStats:
            batter_points_expected_for_rbi
         """
         return self.stats[team]['home_or_away']
+
+    def set_team_opponent(self, team_1, team_2):
+        self.stats[team_1]['opponent'] = team_2
+        self.stats[team_2]['opponent'] = team_1
 
     def get_team_opponent(self, team):
         """
