@@ -902,6 +902,10 @@ class PlayerStats:
     def set_player_salary(self, player, salary):
         self.stats[player]['salary'] = salary
 
+    #Only called when we dont know a team in FanGraph, ie the '- - -' problem
+    def set_player_team(self, player, year, team):
+        self.stats[player][year]['team'] = team
+
     def _clean_salary(self, salary):
         """
         Function:_clean_salary
