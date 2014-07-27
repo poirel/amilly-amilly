@@ -103,6 +103,8 @@ def parseRotoGrinders(player_stats, team_stats):
                     player_stats.set_player_team(full_name,2014,'SEA')
                 elif full_name == 'yangervis solarte':
                     player_stats.set_player_team(full_name,2014,'SDP')
+                elif full_name == 'dan uggla':
+                    player_stats.set_player_team(full_name,2014,'SFG')
 
 
         # update pitcher stats
@@ -269,8 +271,8 @@ def main():
     values = []
     weights = []
     for i,p in enumerate(names,1):
+        #Used to check how far we get through the names
         #print '%d/%d %s' %(i, len(names), p)
-        #print 'Calculating ', p
         classes.append(player_stats.get_player_fielding_position(p))
         values.append(eq.get_score(p))
         #Print Statements for getting players and scores in csv format
