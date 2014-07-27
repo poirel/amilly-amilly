@@ -315,7 +315,7 @@ class PlayerStats:
                 player = items[0].lower()
                 self.stats[player][year]['team'] = get_team_by_mascot(items[1])
                 for i, stat_val in enumerate([float(x) for x in items[2:6]]):
-                    #TODO: REMOVE THIS
+                    #TODO: REMOVE THIS -- This is to help with pitchers without 2014 stats
                     self.stats[player][2014][stats[i]] = 0
                     self.stats[player][year][stats[i]] = stat_val
 
@@ -604,6 +604,8 @@ class PlayerStats:
                 for i, stat_val in enumerate([float(x.rstrip('%')) for x in items[2:15]]):
                     if stats[i]=='bb_percent_total':
                         stat_val/=100.0
+                    #TODO: REMOVE THIS -- This is to help with batters without 2014 stats
+                    self.stats[player][2014][stats[i]] = 0
                     self.stats[player][year][stats[i]] = stat_val
 
     def get_batter_1b_total(self, year, player):
