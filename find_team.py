@@ -112,11 +112,12 @@ def parseRotoGrinders(player_stats, team_stats):
                 continue
 
             #Defaults to right if a player's hand is not available on rotogrinders
+            player_stats.set_player_salary(full_name, pitcher['salary'])
             if pitcher['hand'] == 'right' or pitcher['hand'] == 'left':
                 player_stats.set_player_throwing_hand(full_name, pitcher['hand'])
             else:
                 player_stats.set_player_throwing_hand(full_name, 'right')
-            player_stats.set_player_salary(full_name, pitcher['salary'])
+                player_stats.set_player_salary(full_name, 35000)
             player_stats.set_player_fielding_position(full_name, 'P')
             player_stats.set_starting_pitcher(teams[i], full_name)
             player_stats.set_player_active(full_name)
@@ -268,24 +269,26 @@ def main():
     values = []
     weights = []
     for i,p in enumerate(names,1):
-        print '%d/%d %s' %(i, len(names), p)
-        print 'Calculating ', p
+        #print '%d/%d %s' %(i, len(names), p)
+        #print 'Calculating ', p
         classes.append(player_stats.get_player_fielding_position(p))
         values.append(eq.get_score(p))
         if player_stats.get_player_fielding_position(p) == 'P':
-            print '\tTotal Score:', eq.get_score(p)
-            print '\tWin:', eq.pitcher_points_expected_for_win(p)
-            print '\tER', eq.pitcher_points_expected_for_er(p)
-            print '\tIP', eq.pitcher_points_expected_for_k(p)
-            print '\tK ', eq.pitcher_expected_ip(p)
+            #print '\tTotal Score:', eq.get_score(p)
+            #print '\tWin:', eq.pitcher_points_expected_for_win(p)
+            #print '\tER', eq.pitcher_points_expected_for_er(p)
+            #print '\tIP', eq.pitcher_points_expected_for_k(p)
+            #print '\tK ', eq.pitcher_expected_ip(p)
+            print p, '\tSalary ---', player_stats.get_player_salary(p)
         else:
-            print '\tTotal Score:', eq.get_score(p)
-            print '\tHits:', eq.batter_points_expected_for_hits(p)
-            print '\tHR:  ', eq.batter_points_expected_for_hr(p)
-            print '\tRBI: ', eq.batter_points_expected_for_rbi(p)
-            print '\tRuns:', eq.batter_points_expected_for_runs(p)
-            print '\tSB:  ', eq.batter_points_expected_for_sb(p)
-            print '\tBB:  ', eq.batter_points_expected_for_walks(p)
+            #print '\tTotal Score:', eq.get_score(p)
+            #print '\tHits:', eq.batter_points_expected_for_hits(p)
+            #print '\tHR:  ', eq.batter_points_expected_for_hr(p)
+            #print '\tRBI: ', eq.batter_points_expected_for_rbi(p)
+            #print '\tRuns:', eq.batter_points_expected_for_runs(p)
+            #print '\tSB:  ', eq.batter_points_expected_for_sb(p)
+            #print '\tBB:  ', eq.batter_points_expected_for_walks(p)
+            print p, '\tSalary ---', player_stats.get_player_salary(p)
         weights.append(player_stats.get_player_salary(p))
 
     if args.mcmc:
