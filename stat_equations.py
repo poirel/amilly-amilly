@@ -171,7 +171,7 @@ class StatEquations:
 
             expected_ip = self.pitcher_expected_ip(pitcher)
 
-        return -1.0 * xfip * park_factor * pitcher_hand_hits_mult * expected_ip / 9
+        return -1.0 * xfip * expected_ip / 9 * ((park_factor + pitcher_hand_hits_mult) / 2)
 
     ###########
     # BATTERS #
@@ -274,7 +274,7 @@ class StatEquations:
 
             park_factor = self.ballpark_stats.get_ballpark_factor_batting_average(park, batter_hand)
 
-        return adj_slg * exp_ab * pitcher_eff * batter_eff * park_factor
+        return adj_slg * exp_ab * ((pitcher_eff + batter_eff + park_factor) / 3)
 
     def batter_points_expected_for_walks(self, batter):
         """
@@ -396,7 +396,7 @@ class StatEquations:
 
             park_factor = self.ballpark_stats.get_ballpark_factor_homerun(park, batter_hand)
 
-        return 4.0 * batter_hr_percentage * exp_ab * pitcher_eff * batter_eff * park_factor
+        return 4.0 * batter_hr_percentage * exp_ab * ((pitcher_eff + batter_eff + park_factor) / 3)
 
     def batter_points_expected_for_sb(self, batter):
         """
@@ -444,7 +444,7 @@ class StatEquations:
 
             oppTeam_sb_attempts_allowed_eff = 1.0 * oppTeam_sb_attempts_against / league_sb_attempts_against_avg
 
-        return 2.0 * batter_sb_per_game * oppTeam_sb_allowed_eff * oppTeam_sb_attempts_allowed_eff
+        return 2.0 * batter_sb_per_game * ((oppTeam_sb_allowed_eff * oppTeam_sb_attempts_allowed_eff) / 2)
 
     def batter_points_expected_for_runs(self, batter):
         """
@@ -521,7 +521,7 @@ class StatEquations:
             team_factor = self.team_stats.get_team_runs_total(self.year, batter_team) /\
                           (self.league_stats.get_league_runs(self.year) / 30.0)
 
-        return batter_runs_per_pa * exp_pa * pitcher_eff * batter_eff * park_factor * batting_order_factor * team_factor
+        return batter_runs_per_pa * exp_pa * batting_order_factor * ((pitcher_eff + batter_eff + park_factor + team_factor) / 4)
 
     def batter_points_expected_for_rbi(self, batter):
         """
@@ -598,7 +598,7 @@ class StatEquations:
             team_factor = self.team_stats.get_team_runs_total(self.year, batter_team) /\
                           (self.league_stats.get_league_runs(self.year) / 30.0)
 
-        return batter_runs_per_pa * exp_pa * pitcher_eff * batter_eff * park_factor * batting_order_factor * team_factor
+        return batter_runs_per_pa * exp_pa * batting_order_factor * ((pitcher_eff + batter_eff + park_factor + team_factor) / 4)
 
     ###########
     # Overall #
