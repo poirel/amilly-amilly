@@ -21,7 +21,6 @@ TEAM_COMP = {'P': 1,
              'SS': 1,
              '3B': 1,
              'OF': 3}
-#TEAM_COMP = ['P','C','1B','2B','SS','3B','OF','OF','OF']
 
 
 def parseRotoGrinders(player_stats, team_stats):
@@ -81,6 +80,7 @@ def parseRotoGrinders(player_stats, team_stats):
         # update batter player stats
         for i, players in enumerate(team_players):
             for p in players:
+                #Normalizing pitcher names between FanGraphs and RotoGrinder
                 full_name = player_stats.get_player_full_name(p['name'][0], p['name'].split()[-1], teams[i])
                 if full_name==None:
                     full_name = player_stats.get_player_full_name_simple(p['name'][0], p['name'].split()[-1])
@@ -95,13 +95,19 @@ def parseRotoGrinders(player_stats, team_stats):
 
         # update pitcher stats
         for i, pitcher in enumerate(pitchers):
+            #Normalizing pitcher names between FanGraphs and RotoGrinder
             full_name = player_stats.get_player_full_name(pitcher['name'][0], pitcher['name'].split()[-1], teams[i])
             if full_name==None:
                 full_name = player_stats.get_player_full_name_simple(pitcher['name'][0], pitcher['name'].split()[-1])
             if full_name==None:
                 print 'WARNING: Skipping pitcher %s' %(pitcher['name'])
                 continue
-            player_stats.set_player_throwing_hand(full_name, pitcher['hand'])
+
+            #Defaults to right if a player's hand is not available on rotogrinders
+            if pitcher['hand'] == 'right' or pitcher['hand'] == 'left':
+                player_stats.set_player_throwing_hand(full_name, pitcher['hand'])
+            else:
+                player_stats.set_player_throwing_hand(full_name, 'right')
             player_stats.set_player_salary(full_name, pitcher['salary'])
             player_stats.set_player_fielding_position(full_name, 'P')
             player_stats.set_starting_pitcher(teams[i], full_name)
@@ -248,16 +254,20 @@ def main():
     from mcmc import TeamMCMC
     #TODO: fix this shit
     names = list(player_stats.get_active_players())
-    for p in ['chris capuano', 'logan darnell', 'chase headley','kendrys morales', 'dan uggla', 'nick hundley', 'grady sizemore', 'yangervis solarte']:
-        names.remove(p)
+    #for p in ['chris capuano', 'logan darnell', 'chase headley','kendrys morales', 'dan uggla', 'nick hundley', 'grady sizemore', 'yangervis solarte']:
+        #names.remove(p)
     classes = []
     values = []
     weights = []
     for i,p in enumerate(names,1):
-        print '%d/%d %s' %(i, len(names), p)
+        #print '%d/%d %s' %(i, len(names), p)
         classes.append(player_stats.get_player_fielding_position(p))
         values.append(eq.get_score(p))
         print p,eq.get_score(p)
+        print '\tWin:', eq.pitcher_points_expected_for_win(p)
+        print '\tER', eq.pitcher_points_expected_for_er(p)
+        print '\tIP', eq.pitcher_points_expected_for_k(p)
+        print '\tK ', eq.pitcher_expected_ip(p)
         weights.append(player_stats.get_player_salary(p))
 
     if args.mcmc:
