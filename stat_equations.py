@@ -274,7 +274,7 @@ class StatEquations:
 
             park_factor = self.ballpark_stats.get_ballpark_factor_batting_average(park, batter_hand)
 
-        return adj_slg * exp_ab * ((pitcher_eff + batter_eff + park_factor) / 3)
+        return adj_slg * exp_ab * ((2 * pitcher_eff + 2 * batter_eff + park_factor) / 5)
 
     def batter_points_expected_for_walks(self, batter):
         """
@@ -396,7 +396,7 @@ class StatEquations:
 
             park_factor = self.ballpark_stats.get_ballpark_factor_homerun(park, batter_hand)
 
-        return 4.0 * batter_hr_percentage * exp_ab * ((pitcher_eff + batter_eff + park_factor) / 3)
+        return 4.0 * batter_hr_percentage * exp_ab * ((2 * pitcher_eff + 2 * batter_eff + park_factor) / 5)
 
     def batter_points_expected_for_sb(self, batter):
         """
@@ -521,7 +521,7 @@ class StatEquations:
             team_factor = self.team_stats.get_team_runs_total(self.year, batter_team) /\
                           (self.league_stats.get_league_runs(self.year) / 30.0)
 
-        return batter_runs_per_pa * exp_pa * batting_order_factor * ((pitcher_eff + batter_eff + park_factor + team_factor) / 4)
+        return batter_runs_per_pa * exp_pa * batting_order_factor * ((2 * pitcher_eff + 2 * batter_eff + park_factor + team_factor) / 6)
 
     def batter_points_expected_for_rbi(self, batter):
         """
@@ -598,7 +598,7 @@ class StatEquations:
             team_factor = self.team_stats.get_team_runs_total(self.year, batter_team) /\
                           (self.league_stats.get_league_runs(self.year) / 30.0)
 
-        return batter_runs_per_pa * exp_pa * batting_order_factor * ((pitcher_eff + batter_eff + park_factor + team_factor) / 4)
+        return batter_runs_per_pa * exp_pa * batting_order_factor * ((2 * pitcher_eff + 2 * batter_eff + park_factor + team_factor) / 6)
 
     ###########
     # Overall #
