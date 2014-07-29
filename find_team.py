@@ -81,7 +81,9 @@ def parseRotoGrinders(player_stats, team_stats):
         for i, players in enumerate(team_players):
             for p in players:
                 #Normalizing pitcher names between FanGraphs and RotoGrinder
+                #print 'Enter Full Name Equation', p['name'][0], p['name'].split()[-1], teams[i]
                 full_name = player_stats.get_player_full_name(p['name'][0], p['name'].split()[-1], teams[i])
+                #print 'Starting full name: ', full_name
                 if full_name==None:
                     full_name = player_stats.get_player_full_name_simple(p['name'][0], p['name'].split()[-1])
                 if full_name==None:
@@ -276,10 +278,10 @@ def main():
         classes.append(player_stats.get_player_fielding_position(p))
         values.append(eq.get_score(p))
         #Print Statements for getting players and scores in csv format
-        if player_stats.get_player_fielding_position(p) == 'P':
-            print p,',',eq.get_score(p),',',eq.pitcher_points_expected_for_win(p),',',eq.pitcher_points_expected_for_er(p),',',eq.pitcher_points_expected_for_k(p),',',eq.pitcher_expected_ip(p), ','
-        else:
-             p,',',eq.get_score(p),',',eq.batter_points_expected_for_hits(p),',',eq.batter_points_expected_for_hr(p),',',eq.batter_points_expected_for_rbi(p),',',eq.batter_points_expected_for_runs(p),',',eq.batter_points_expected_for_sb(p),',',eq.batter_points_expected_for_walks(p),','
+        #if player_stats.get_player_fielding_position(p) == 'P':
+            #p,',',eq.get_score(p),',',eq.pitcher_points_expected_for_win(p),',',eq.pitcher_points_expected_for_er(p),',',eq.pitcher_points_expected_for_k(p),',',eq.pitcher_expected_ip(p), ','
+        #else:
+            #p,',',eq.get_score(p),',',eq.batter_points_expected_for_hits(p),',',eq.batter_points_expected_for_hr(p),',',eq.batter_points_expected_for_rbi(p),',',eq.batter_points_expected_for_runs(p),',',eq.batter_points_expected_for_sb(p),',',eq.batter_points_expected_for_walks(p),','
         weights.append(player_stats.get_player_salary(p))
 
     if args.mcmc:
