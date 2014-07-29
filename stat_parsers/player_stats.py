@@ -90,12 +90,12 @@ class PlayerStats:
         self.stats = defaultdict(lambda: defaultdict( lambda: defaultdict( lambda: defaultdict (dict))))
         self.starting_pitchers = {}
 
+        self.read_batter_stats_total()
+        self.read_pitcher_stats_total()
         self.read_pitcher_stats_home_away()
         self.read_pitcher_stats_vs_RHB_LHB()
-        self.read_pitcher_stats_total()
         self.read_catcher_fielding_stats()
         self.read_batter_stats_vs_RHP_LHP()
-        self.read_batter_stats_total()
         self.read_batter_stats_7_day()
 
         # print len([name for name, stats in self.stats.items() if 'bats' in stats])
@@ -1409,7 +1409,7 @@ class PlayerStats:
 
     def get_player_full_name(self, first_initial, last_name, team):
         for p, pstats in self.stats.items():
-            if first_initial.lower() != p[0]:
+            if first_initial.lower() != p[0].lower():
                 continue
             if last_name.lower() != p.split()[-1]:
                 continue
