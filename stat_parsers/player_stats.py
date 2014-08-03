@@ -98,10 +98,9 @@ class PlayerStats:
         self.read_batter_stats_vs_RHP_LHP()
         self.read_batter_stats_7_day()
 
-        # print len([name for name, stats in self.stats.items() if 'bats' in stats])
-        # print len([name for name, stats in self.stats.items() if 2014 in stats])
-        # print len([name for name, stats in self.stats.items() if 2013 in stats])
-        # print len([name for name, stats in self.stats.items() if '7_day' in stats])
+
+        #print len(self.stats.items())
+        #print len([name for name, stats in self.stats.items() if '7_day' in stats])
 
     def printStats(self):
         """
@@ -143,7 +142,7 @@ class PlayerStats:
         :return nothing
         """
         stat = 'xfip'
-        years = [2013, 2014]
+        years = [2014]
         for year in years:
             for loc in ['Home', 'Away']:
                 infile = '%s/Pitcher/%d/%d %s Pitcher Stats.csv' %(self.statsDir, year, year, loc)
@@ -151,8 +150,9 @@ class PlayerStats:
                 header = reader.next()
                 for items in reader:
                     player = items[0].lower()
+                    team = get_team_by_mascot(items[1])
                     xfip = float(items[2])
-                    self.stats[player][year][stat][loc.lower()] = xfip
+                    self.stats[(player, team)][year][stat][loc.lower()] = xfip
 
     def get_pitcher_xfip_allowed(self, year, player, homeOrAway):
         """
@@ -186,7 +186,7 @@ class PlayerStats:
         :return nothing
         """
         stats = ['hr_allowed', 'bb_allowed', 'tbf', 'woba_allowed']
-        years = [2013, 2014]
+        years = [2014]
         for year in years:
             for hand in ['RHB', 'LHB']:
                 infile = '%s/Pitcher/%d/%d Pitcher Stats vs %s.csv' %(self.statsDir, year, year, hand)
@@ -194,8 +194,9 @@ class PlayerStats:
                 header = reader.next()
                 for items in reader:
                     player = items[0].lower()
+                    team = get_team_by_mascot(items[1])
                     for i, stat_val in enumerate([float(x) for x in items[2:6]]):
-                        self.stats[player][year][stats[i]][hand] = stat_val
+                        self.stats[(player, team)][year][stats[i]][hand] = stat_val
 
     def get_pitcher_hr_allowed_vs_RHB_LHB(self, year, player, hand):
         """
@@ -306,19 +307,17 @@ class PlayerStats:
         :return nothing
         """
         stats = ['gs_total', 'k_pitched_total', 'ip_total', 'g_total']
-        years = [2013, 2014]
+        years = [2014]
         for year in years:
             infile = '%s/Pitcher/%d/%d Total Pitcher Stats.csv' %(self.statsDir, year, year)
             reader = csv.reader(open(infile), quotechar='"')
             header = reader.next()
             for items in reader:
                 player = items[0].lower()
-                self.stats[player][year]['team'] = get_team_by_mascot(items[1])
+                team = get_team_by_mascot(items[1])
+                self.stats[(player, team)][year]['team'] = get_team_by_mascot(items[1])
                 for i, stat_val in enumerate([float(x) for x in items[2:6]]):
-                    #TODO: REMOVE THIS -- This is to help with pitchers without 2014 stats
-                    if year == 2013:
-                        self.stats[player][2014][stats[i]] = 0
-                    self.stats[player][year][stats[i]] = stat_val
+                    self.stats[(player, team)][year][stats[i]] = stat_val
 
     def get_pitcher_total_games_played(self, year, player):
         """
@@ -404,15 +403,16 @@ class PlayerStats:
         :return nothing
         """
         stats = ['sb_catcher', 'cs_catcher']
-        years = [2013, 2014]
+        years = [2014]
         for year in years:
             infile = '%s/Catcher/%d Catcher Stats.csv' %(self.statsDir, year)
             reader = csv.reader(open(infile), quotechar='"')
             header = reader.next()
             for items in reader:
                 player = items[0].lower()
+                team = get_team_by_mascot(items[1])
                 for i, stat_val in enumerate([float(x) for x in items[2:4]]):
-                    self.stats[player][year][stats[i]] = stat_val
+                    self.stats[(player, team)][year][stats[i]] = stat_val
 
     def get_catcher_fielding_stolen_bases_allowed(self, year, player):
         """
@@ -462,7 +462,7 @@ class PlayerStats:
         :return nothing
         """
         stats = ['pa', 'hr', 'k', 'woba']
-        years = [2013, 2014]
+        years = [2014]
         for year in years:
             for hand in ['RHP', 'LHP']:
                 infile = '%s/Batter/%d/%d Batter Stats vs %s.csv' %(self.statsDir, year, year, hand)
@@ -470,8 +470,9 @@ class PlayerStats:
                 header = reader.next()
                 for items in reader:
                     player = items[0].lower()
+                    team = get_team_by_mascot(items[1])
                     for i, stat_val in enumerate([float(x) for x in items[2:6]]):
-                        self.stats[player][year][stats[i]][hand] = stat_val
+                        self.stats[(player, team)][year][stats[i]][hand] = stat_val
 
     def get_batter_plate_appearances_vs_RHP_LHP(self, year, player, hand):
         """
@@ -594,21 +595,19 @@ class PlayerStats:
                  'g_total',
                  'sb_total',
                  'cs_total']
-        years = [2013, 2014]
+        years = [2014]
         for year in years:
             infile = '%s/Batter/%d/%d Total Batter Stats.csv' %(self.statsDir, year, year)
             reader = csv.reader(open(infile), quotechar='"')
             header = reader.next()
             for items in reader:
                 player = items[0].lower()
-                self.stats[player][year]['team'] = get_team_by_mascot(items[1])
+                team = get_team_by_mascot(items[1])
+                self.stats[(player, team)][year]['team'] = get_team_by_mascot(items[1])
                 for i, stat_val in enumerate([float(x.rstrip('%')) for x in items[2:15]]):
                     if stats[i]=='bb_percent_total':
                         stat_val/=100.0
-                    #TODO: REMOVE THIS -- This is to help with batters without 2014 stats
-                    if year == 2013:
-                        self.stats[player][2014][stats[i]] = 0
-                    self.stats[player][year][stats[i]] = stat_val
+                    self.stats[(player, team)][year][stats[i]] = stat_val
 
     def get_batter_1b_total(self, year, player):
         """
@@ -927,60 +926,6 @@ class PlayerStats:
         """
         return self.stats[player]['starting']
 
-    def read_rosters(self):
-        """
-        DEPRECATED: DO NOT USE
-
-        Function:read_rosters
-        -----------------
-        Reads team rosters from ESPN from the following URL:
-
-            http://espn.go.com/mlb/team/roster/_/name/(TEAM)/sort/lastName/(LOCATION)-(MASCOT)
-
-        Note: This method includes:
-
-            - Mapping for Handedness of Batters and Pitchers
-            - Normalization of Team Identifier across ESPN and FanDuel
-
-        Parameters:
-            :param none
-
-        :return nothing
-        """
-        handMap = {'R': 'right',
-                   'L': 'left',
-                   'B': 'switch',
-                   'S': 'switch'}
-
-        for team in get_teams():
-            url_team = team
-            if team=='LOS':
-                url_team = 'LAD'
-            elif team=='CWS':
-                url_team='CHW'
-            elif team=='SDP':
-                url_team='SD'
-            elif team=='SFG':
-                url_team='SF'
-
-            url_mascot = get_team_mascot(team).lower().replace(' ', '-')
-            url_location = get_team_location(team).lower().replace(' ', '-')
-            url = 'http://espn.go.com/mlb/team/roster/_/name/%s/sort/lastName/%s-%s' %(url_team.lower(), url_location, url_mascot)
-            doc = urllib2.urlopen(url).read()
-            soup = BeautifulSoup(doc)
-            tab = soup.find('table')
-            # header = [td.text for td in tab.find_all('tr')[1].find_all('td')]
-            # Header for data is : ['NO.', 'NAME', 'POS', 'BAT', 'THW', 'AGE', 'HT', 'WT', 'BIRTH PLACE', 'SALARY']
-            player_data = [[td.text for td in tr.find_all('td')] for tr in tab.find_all('tr')[2:]]
-            for p in player_data:
-                # TODO: could use this DL information.
-                player = re.sub('DL[0-9]*$', '', p[1]).strip().lower()
-                # TODO: could use this position info
-                position = p[2]
-                self.stats[player]['team'] = team
-                self.stats[player]['bats'] = handMap[p[3]]
-                self.stats[player]['throws'] = handMap[p[4]]
-
     def set_player_throwing_hand(self, player, hand):
         self.stats[player]['throws'] = hand
 
@@ -1108,49 +1053,6 @@ class PlayerStats:
         """
         return self.starting_pitchers[team]
 
-    def _normalize_name(self, name):
-        """
-        Function: _normalize_name
-        -----------------
-        Private method to normalize player names across ESPN and FanDuel
-
-        NOTE: Zach claimed on 2014-06-28 that we will only need this sub for ~30 names.
-
-        Parameters:
-            :param name: the player name we want to normalize
-
-        :return the normalized name
-
-        equations used in:
-            read_fanduel_positions_and_salaries
-        """
-        if name.lower()=="tom milone":
-            return "tommy milone"
-        if name.lower()=="michael bolsinger":
-            return "mike bolsinger"
-        return name
-
-    def _clean_name(self, name):
-        """
-        Function: _clean_name
-        -----------------
-        Private method to clean player names from FanDuel
-
-        Parameters:
-            :param name: the player name we want to clean
-
-        :return a tuple (name, status) where status is "P", "DL" or None
-
-        equations used in:
-            read_fanduel_positions_and_salaries
-        """
-        if name.endswith('DL'):
-            return name.lower()[:-2], 'DL'
-        elif name.endswith('P'):
-            return name.lower()[:-1], 'P'
-        else:
-            return name.lower(), None
-
     def get_active_players(self):
         """
         Function: get_active_players
@@ -1203,10 +1105,11 @@ class PlayerStats:
         header = reader.next()
         for items in reader:
             player = items[0].lower()
+            team = get_team_by_mascot(items[1])
             for i, stat_val in enumerate([float(x.rstrip('%')) for x in items[2:13]]):
                 if stats[i]=='bb_percent_7_day':
                     stat_val/=100.0
-                self.stats[player]['7_day'][stats[i]] = stat_val
+                self.stats[(player, team)]['7_day'][stats[i]] = stat_val
 
     def get_batter_ab_7_day(self, player):
         """
@@ -1408,22 +1311,24 @@ class PlayerStats:
 
 
     def get_player_full_name(self, first_initial, last_name, team):
-        for p, pstats in self.stats.items():
-            if first_initial.lower() != p[0].lower():
+        for (pname, pteam), pstats in self.stats.items():
+            if first_initial.lower() != pname[0].lower():
                 continue
-            if last_name.lower() != p.split()[-1]:
+            if last_name.lower() != pname.split()[-1]:
                 continue
-            if team != pstats[2014]['team']:
+            if team != pteam:
                 continue
-            return p
-        return None
+            return (pname, pteam)
+
+        # couldn't find name/team match
+        for (pname, pteam), pstats in self.stats.items():
+            if first_initial.lower() != pname[0].lower():
+                continue
+            if last_name.lower() != pname.split()[-1]:
+                continue
+
+            self.stats[(pname, team)] = self.stats[(pname, pteam)]
+            return (pname, team)
 
 
-    def get_player_full_name_simple(self, first_initial, last_name):
-        for p, pstats in self.stats.items():
-            if first_initial.lower() != p[0]:
-                continue
-            if last_name.lower() != p.split()[-1]:
-                continue
-            return p
         return None

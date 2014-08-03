@@ -276,7 +276,7 @@ class TeamStats:
 
         :return nothing
         """
-        years = [2013, 2014]
+        years = [2014]
         for year in years:
             infile = '%s/Team/%d Team Stats.csv' %(self.statsDir, year)
             reader = csv.reader(open(infile), quotechar='"')
@@ -317,7 +317,7 @@ class TeamStats:
         :return nothing
         """
         stats = ['so', 'pa', 'woba']
-        years = [2013, 2014]
+        years = [2014]
         for year in years:
             for hand in ['RHP', 'LHP']:
                 infile = '%s/Team/%d Team Stats vs %s.csv' %(self.statsDir, year, hand)
@@ -488,7 +488,7 @@ class TeamStats:
 
         :return nothing
         """
-        years = [2013, 2014]
+        years = [2014]
         for year in years:
             infile = '%s/Team/%d Team Fielding Stats.csv' %(self.statsDir, year)
             reader = csv.reader(open(infile), quotechar='"')

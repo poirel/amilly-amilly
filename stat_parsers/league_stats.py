@@ -60,7 +60,7 @@ class LeagueStats:
         :return nothing
         """
         stats = ['k_percent', 'ops', 'sb', 'cs', 'hr', 'pa', 'bb', 'r', 'woba']
-        years = [2013, 2014]
+        years = [2014]
         for year in years:
             infile = '%s/League/%d League Stats.csv' %(self.statsDir, year)
             reader = csv.reader(open(infile), quotechar='"')

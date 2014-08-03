@@ -82,53 +82,50 @@ def parseRotoGrinders(player_stats, team_stats):
             for p in players:
                 #Normalizing pitcher names between FanGraphs and RotoGrinder
                 #print 'Enter Full Name Equation', p['name'][0], p['name'].split()[-1], teams[i]
-                full_name = player_stats.get_player_full_name(p['name'][0], p['name'].split()[-1], teams[i])
-                #print 'Starting full name: ', full_name
-                if full_name==None:
-                    full_name = player_stats.get_player_full_name_simple(p['name'][0], p['name'].split()[-1])
-                if full_name==None:
+                curr_team = teams[i]
+                name_and_team = player_stats.get_player_full_name(p['name'][0], p['name'].split()[-1], curr_team)
+                if name_and_team==None:
                     print 'WARNING: Skipping batter %s' %(p['name'])
                     continue
-                player_stats.set_player_batting_hand(full_name, p['hand'])
-                player_stats.set_player_batting_position(full_name, p['counter'])
-                player_stats.set_player_salary(full_name, p['salary'])
-                player_stats.set_player_fielding_position(full_name, p['position'].upper())
-                player_stats.set_player_active(full_name)
+                player_stats.set_player_batting_hand(name_and_team, p['hand'])
+                player_stats.set_player_batting_position(name_and_team, p['counter'])
+                player_stats.set_player_salary(name_and_team, p['salary'])
+                player_stats.set_player_fielding_position(name_and_team, p['position'].upper())
+                player_stats.set_player_active(name_and_team)
 
-                #Accounting for no teams in FanGraphs
-                #TODO: Fix this
-                if full_name == 'chase headley':
-                    player_stats.set_player_team(full_name,2014,'NYY')
-                elif full_name == 'sam fuld':
-                    player_stats.set_player_team(full_name,2014,'MIN')
-                elif full_name == 'kendrys morales':
-                    player_stats.set_player_team(full_name,2014,'SEA')
-                elif full_name == 'yangervis solarte':
-                    player_stats.set_player_team(full_name,2014,'SDP')
-                elif full_name == 'dan uggla':
-                    player_stats.set_player_team(full_name,2014,'SFG')
+                # #Accounting for no teams in FanGraphs
+                # #TODO: Fix this
+                # full_name = name_and_team[0]
+                # if full_name == 'chase headley':
+                #     player_stats.set_player_team((full_name, 'MYY'),2014,'NYY')
+                # elif full_name == 'sam fuld':
+                #     player_stats.set_player_team((full_name, 'MIN'),2014,'MIN')
+                # elif full_name == 'kendrys morales':
+                #     player_stats.set_player_team((full_name, 'SEA'),2014,'SEA')
+                # elif full_name == 'yangervis solarte':
+                #     player_stats.set_player_team((full_name, 'SDP'),2014,'SDP')
+                # elif full_name == 'dan uggla':
+                #     player_stats.set_player_team((full_name, 'SFG'),2014,'SFG')
 
 
         # update pitcher stats
         for i, pitcher in enumerate(pitchers):
             #Normalizing pitcher names between FanGraphs and RotoGrinder
-            full_name = player_stats.get_player_full_name(pitcher['name'][0], pitcher['name'].split()[-1], teams[i])
-            if full_name==None:
-                full_name = player_stats.get_player_full_name_simple(pitcher['name'][0], pitcher['name'].split()[-1])
-            if full_name==None:
+            name_and_team = player_stats.get_player_full_name(pitcher['name'][0], pitcher['name'].split()[-1], teams[i])
+            if name_and_team==None:
                 print 'WARNING: Skipping pitcher %s' %(pitcher['name'])
                 continue
 
             #Defaults to right if a player's hand is not available on rotogrinders
-            player_stats.set_player_salary(full_name, pitcher['salary'])
+            player_stats.set_player_salary(name_and_team, pitcher['salary'])
             if pitcher['hand'] == 'right' or pitcher['hand'] == 'left':
-                player_stats.set_player_throwing_hand(full_name, pitcher['hand'])
+                player_stats.set_player_throwing_hand(name_and_team, pitcher['hand'])
             else:
-                player_stats.set_player_throwing_hand(full_name, 'right')
-                player_stats.set_player_salary(full_name, 35000)
-            player_stats.set_player_fielding_position(full_name, 'P')
-            player_stats.set_starting_pitcher(teams[i], full_name)
-            player_stats.set_player_active(full_name)
+                player_stats.set_player_throwing_hand(name_and_team, 'right')
+                player_stats.set_player_salary(name_and_team, 35000)
+            player_stats.set_player_fielding_position(name_and_team, 'P')
+            player_stats.set_starting_pitcher(teams[i], name_and_team)
+            player_stats.set_player_active(name_and_team)
 
 
 def _parseHeader(header):
@@ -145,7 +142,7 @@ def _parseHeader(header):
             name = name.strip()
             hand = 'right' if hand.lower()=='r' else 'left'
             salary = _convertSalary(salary)
-        player = {'name': name,
+        player = {'name': name.lower(),
                   'hand': hand,
                   'salary': salary
                  }
@@ -185,7 +182,7 @@ def _parseLineups(lineups):
                 position = items[idx]
                 idx += 1
                 player = {'counter': counter,
-                          'name': name,
+                          'name': name.lower(),
                           'hand': hand,
                           'salary': salary,
                           'position': position
