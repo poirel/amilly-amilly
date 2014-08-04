@@ -87,25 +87,32 @@ def parseRotoGrinders(player_stats, team_stats):
                 if name_and_team==None:
                     print 'WARNING: Skipping batter %s' %(p['name'])
                     continue
+
+                if p['hand'] == 'right' or p['hand'] == 'left':
+                    player_stats.set_player_batting_hand(name_and_team, p['hand'])
+                elif p['hand'] == 'both':
+                    if i==0:
+                        opp_throw_hand = pitchers[1]['hand']
+                    else:
+                        opp_throw_hand = pitchers[0]['hand']
+
+                    if opp_throw_hand=='left':
+                        player_stats.set_player_batting_hand(name_and_team, 'right')
+                    elif opp_throw_hand=='right':
+                        player_stats.set_player_batting_hand(name_and_team, 'left')
+                    else:
+                        print 'ERROR: Couldn\'t determine opposing pitching hand -- skipping team.'
+                        continue
+                else:
+                    print 'WARNING: Skipping batter %s' %(p['name'])
+                    continue
+
                 player_stats.set_player_batting_hand(name_and_team, p['hand'])
                 player_stats.set_player_batting_position(name_and_team, p['counter'])
                 player_stats.set_player_salary(name_and_team, p['salary'])
                 player_stats.set_player_fielding_position(name_and_team, p['position'].upper())
+                player_stats.set_player_team(name_and_team, curr_team)
                 player_stats.set_player_active(name_and_team)
-
-                # #Accounting for no teams in FanGraphs
-                # #TODO: Fix this
-                # full_name = name_and_team[0]
-                # if full_name == 'chase headley':
-                #     player_stats.set_player_team((full_name, 'MYY'),2014,'NYY')
-                # elif full_name == 'sam fuld':
-                #     player_stats.set_player_team((full_name, 'MIN'),2014,'MIN')
-                # elif full_name == 'kendrys morales':
-                #     player_stats.set_player_team((full_name, 'SEA'),2014,'SEA')
-                # elif full_name == 'yangervis solarte':
-                #     player_stats.set_player_team((full_name, 'SDP'),2014,'SDP')
-                # elif full_name == 'dan uggla':
-                #     player_stats.set_player_team((full_name, 'SFG'),2014,'SFG')
 
 
         # update pitcher stats
@@ -125,6 +132,7 @@ def parseRotoGrinders(player_stats, team_stats):
                 player_stats.set_player_salary(name_and_team, 35000)
             player_stats.set_player_fielding_position(name_and_team, 'P')
             player_stats.set_starting_pitcher(teams[i], name_and_team)
+            player_stats.set_player_team(name_and_team, curr_team)
             player_stats.set_player_active(name_and_team)
 
 
@@ -175,8 +183,10 @@ def _parseLineups(lineups):
                     hand = 'right'
                 elif hand=='l':
                     hand = 'left'
-                else:
+                elif hand=='s':
                     hand = 'both'
+                else:
+                    hand = 'unknown'
                 salary = _convertSalary(items[idx])
                 idx += 1
                 position = items[idx]
@@ -214,8 +224,6 @@ def main():
 
     print 'Parsing Rotogrinders...'
     parseRotoGrinders(player_stats, team_stats)
-
-
 
     # start computing some stats here
     print 'Computing Equations...'
@@ -256,7 +264,7 @@ def main():
     # players.read_projections(args.projections)
     #
     # names = players.get_names()
-    # classes = [players.get_player_fielding_position(n) for n in names]
+    # classes = [playerget_player_teams.get_player_fielding_position(n) for n in names]
     # values = [players.get_score(n) for n in names]
     # weights = [players.get_player_salary(n) for n in names]
     #
@@ -265,21 +273,33 @@ def main():
     #    #knapsack.find_solution()
 
     from mcmc import TeamMCMC
-    names = list(player_stats.get_active_players())
+    candidate_players = list(player_stats.get_active_players())
+
+    names = []
     classes = []
     values = []
     weights = []
-    for i,p in enumerate(names,1):
+
+    for i,p in enumerate(candidate_players,1):
         #Used to check how far we get through the names
-        #print '%d/%d %s' %(i, len(names), p), eq.get_score(p)
+        try:
+            score = eq.get_score(p)
+        except:
+            print "ERROR: Couldn't get score for ", p
+            continue
+
+        print '%d/%d %s %s %s' %(i, len(candidate_players), p, player_stats.get_player_team(p), player_stats.get_player_fielding_position(p)), score
+        names.append(p)
         classes.append(player_stats.get_player_fielding_position(p))
         values.append(eq.get_score(p))
+        weights.append(player_stats.get_player_salary(p))
+
         #Print Statements for getting players and scores in csv format
         #if player_stats.get_player_fielding_position(p) == 'P':
             #p,',',eq.get_score(p),',',eq.pitcher_points_expected_for_win(p),',',eq.pitcher_points_expected_for_er(p),',',eq.pitcher_points_expected_for_k(p),',',eq.pitcher_expected_ip(p), ','
         #else:
             #p,',',eq.get_score(p),',',eq.batter_points_expected_for_hits(p),',',eq.batter_points_expected_for_hr(p),',',eq.batter_points_expected_for_rbi(p),',',eq.batter_points_expected_for_runs(p),',',eq.batter_points_expected_for_sb(p),',',eq.batter_points_expected_for_walks(p),','
-        weights.append(player_stats.get_player_salary(p))
+
 
     if args.mcmc:
         mcmc = TeamMCMC(names, classes, values, weights, CAPACITY, TEAM_COMP)

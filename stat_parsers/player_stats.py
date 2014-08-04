@@ -96,7 +96,7 @@ class PlayerStats:
         self.read_pitcher_stats_vs_RHB_LHB()
         self.read_catcher_fielding_stats()
         self.read_batter_stats_vs_RHP_LHP()
-        self.read_batter_stats_7_day()
+        #self.read_batter_stats_7_day()
 
 
         #print len(self.stats.items())
@@ -150,9 +150,11 @@ class PlayerStats:
                 header = reader.next()
                 for items in reader:
                     player = items[0].lower()
+                    uid = int(items[3])
                     team = get_team_by_mascot(items[1])
+                    self.stats[(player, uid)]['teams'] = self.stats[(player, uid)].get('teams', []) + [team]
                     xfip = float(items[2])
-                    self.stats[(player, team)][year][stat][loc.lower()] = xfip
+                    self.stats[(player, uid)][year][stat][loc.lower()] = xfip
 
     def get_pitcher_xfip_allowed(self, year, player, homeOrAway):
         """
@@ -194,9 +196,11 @@ class PlayerStats:
                 header = reader.next()
                 for items in reader:
                     player = items[0].lower()
+                    uid = int(items[6])
                     team = get_team_by_mascot(items[1])
+                    self.stats[(player, uid)]['teams'] = self.stats[(player, uid)].get('teams', []) + [team]
                     for i, stat_val in enumerate([float(x) for x in items[2:6]]):
-                        self.stats[(player, team)][year][stats[i]][hand] = stat_val
+                        self.stats[(player, uid)][year][stats[i]][hand] = stat_val
 
     def get_pitcher_hr_allowed_vs_RHB_LHB(self, year, player, hand):
         """
@@ -314,10 +318,11 @@ class PlayerStats:
             header = reader.next()
             for items in reader:
                 player = items[0].lower()
+                uid = int(items[6])
                 team = get_team_by_mascot(items[1])
-                self.stats[(player, team)][year]['team'] = get_team_by_mascot(items[1])
+                self.stats[(player, uid)]['teams'] = self.stats[(player, uid)].get('teams', []) + [team]
                 for i, stat_val in enumerate([float(x) for x in items[2:6]]):
-                    self.stats[(player, team)][year][stats[i]] = stat_val
+                    self.stats[(player, uid)][year][stats[i]] = stat_val
 
     def get_pitcher_total_games_played(self, year, player):
         """
@@ -410,9 +415,11 @@ class PlayerStats:
             header = reader.next()
             for items in reader:
                 player = items[0].lower()
+                uid = int(items[4])
                 team = get_team_by_mascot(items[1])
+                self.stats[(player, uid)]['teams'] = self.stats[(player, uid)].get('teams', []) + [team]
                 for i, stat_val in enumerate([float(x) for x in items[2:4]]):
-                    self.stats[(player, team)][year][stats[i]] = stat_val
+                    self.stats[(player, uid)][year][stats[i]] = stat_val
 
     def get_catcher_fielding_stolen_bases_allowed(self, year, player):
         """
@@ -470,9 +477,12 @@ class PlayerStats:
                 header = reader.next()
                 for items in reader:
                     player = items[0].lower()
+                    uid = int(items[6])
                     team = get_team_by_mascot(items[1])
+                    self.stats[(player, uid)]['teams'] = self.stats[(player, uid)].get('teams', []) + [team]
+
                     for i, stat_val in enumerate([float(x) for x in items[2:6]]):
-                        self.stats[(player, team)][year][stats[i]][hand] = stat_val
+                        self.stats[(player, uid)][year][stats[i]][hand] = stat_val
 
     def get_batter_plate_appearances_vs_RHP_LHP(self, year, player, hand):
         """
@@ -602,12 +612,13 @@ class PlayerStats:
             header = reader.next()
             for items in reader:
                 player = items[0].lower()
+                uid = int(items[15])
                 team = get_team_by_mascot(items[1])
-                self.stats[(player, team)][year]['team'] = get_team_by_mascot(items[1])
+                self.stats[(player, uid)]['teams'] = self.stats[(player, uid)].get('teams', []) + [team]
                 for i, stat_val in enumerate([float(x.rstrip('%')) for x in items[2:15]]):
                     if stats[i]=='bb_percent_total':
                         stat_val/=100.0
-                    self.stats[(player, team)][year][stats[i]] = stat_val
+                    self.stats[(player, uid)][year][stats[i]] = stat_val
 
     def get_batter_1b_total(self, year, player):
         """
@@ -752,7 +763,7 @@ class PlayerStats:
             batter_points_expected_for_runs
             batter_points_expected_for_rbi
         """
-        return self.stats[player][year]['ab_total']
+        return self.stats[player][year].get('ab_total', 0)
 
     def get_batter_pa_total(self, year, player):
         """
@@ -857,10 +868,6 @@ class PlayerStats:
 
     def set_player_salary(self, player, salary):
         self.stats[player]['salary'] = salary
-
-    #Only called when we dont know a team in FanGraph, ie the '- - -' problem
-    def set_player_team(self, player, year, team):
-        self.stats[player][year]['team'] = team
 
     def _clean_salary(self, salary):
         """
@@ -981,6 +988,9 @@ class PlayerStats:
             return 'right'
         return self.stats[player]['bats']
 
+    def set_player_team(self, player, team):
+        self.stats[player]['team'] = team
+
     def get_player_team(self, player):
         """
         Function: get_player_team
@@ -1003,7 +1013,7 @@ class PlayerStats:
             batter_points_expected_for_runs
             batter_points_expected_for_rbi
         """
-        return self.stats[player][2014]['team']
+        return self.stats[player]['team']
 
 
     def set_player_batting_position(self, player, order):
@@ -1105,11 +1115,13 @@ class PlayerStats:
         header = reader.next()
         for items in reader:
             player = items[0].lower()
+            uid = int(items[13])
             team = get_team_by_mascot(items[1])
+            self.stats[(player, uid)]['teams'] = self.stats[(player, uid)].get('teams', []) + [team]
             for i, stat_val in enumerate([float(x.rstrip('%')) for x in items[2:13]]):
                 if stats[i]=='bb_percent_7_day':
                     stat_val/=100.0
-                self.stats[(player, team)]['7_day'][stats[i]] = stat_val
+                self.stats[(player, uid)]['7_day'][stats[i]] = stat_val
 
     def get_batter_ab_7_day(self, player):
         """
@@ -1311,24 +1323,23 @@ class PlayerStats:
 
 
     def get_player_full_name(self, first_initial, last_name, team):
-        for (pname, pteam), pstats in self.stats.items():
+        for (pname, uid), pstats in self.stats.items():
             if first_initial.lower() != pname[0].lower():
                 continue
             if last_name.lower() != pname.split()[-1]:
                 continue
-            if team != pteam:
+            if team not in pstats['teams']:
                 continue
-            return (pname, pteam)
+            return (pname, uid)
+
 
         # couldn't find name/team match
-        for (pname, pteam), pstats in self.stats.items():
+        for (pname, uid), pstats in self.stats.items():
             if first_initial.lower() != pname[0].lower():
                 continue
             if last_name.lower() != pname.split()[-1]:
                 continue
 
-            self.stats[(pname, team)] = self.stats[(pname, pteam)]
-            return (pname, team)
-
+            return (pname, uid)
 
         return None
