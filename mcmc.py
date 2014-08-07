@@ -86,7 +86,7 @@ class TeamMCMC:
         self.current_value += self.values[new_name]
 
     def print_team(self):
-        print '$%d' % self.current_cost, self.current_value, sorted(self.current_team), "\n", self.current_team
+        print '$%d' % self.current_cost, self.current_value, sorted(self.current_team)
 
     def should_transition(self, old_val, new_val, temp):
         if old_val < new_val:
