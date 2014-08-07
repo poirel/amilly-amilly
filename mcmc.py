@@ -2,10 +2,14 @@ from random import choice, shuffle, random
 from collections import defaultdict
 from math import exp
 from numpy import arange
+from stat_parsers.player_stats import PlayerStats
+
+import argparse
 
 class TeamMCMC:
 
     def __init__(self, names, classes, values, costs, capacity, object_composition):
+
 
         self.names = names
         self.values = dict(zip(names, values))
@@ -41,7 +45,6 @@ class TeamMCMC:
         self.current_cost -= self.costs[name]
 
     def make_random_team(self):
-        print 'making random team'
         team_found = False
         self.clear_team()
         while len(self.current_team) < len(self.valid_comp):
@@ -83,7 +86,7 @@ class TeamMCMC:
         self.current_value += self.values[new_name]
 
     def print_team(self):
-        print '$%d' % self.current_cost, self.current_value, sorted(self.current_team)
+        print '$%d' % self.current_cost, self.current_value, sorted(self.current_team), "\n", self.current_team
 
     def should_transition(self, old_val, new_val, temp):
         if old_val < new_val:
@@ -96,7 +99,7 @@ class TeamMCMC:
 
     def find_simulated_annealing_solution(self):
         for i in range(10):
-            print 'SGG',i
+            print 'Stadium Grinders Team ',i
             self.make_random_team()
             for temp in arange(1000, 0, -0.25):
                 old_name, new_name = self.get_neighbor()
