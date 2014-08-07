@@ -310,7 +310,7 @@ class PlayerStats:
 
         :return nothing
         """
-        stats = ['gs_total', 'k_pitched_total', 'ip_total', 'g_total']
+        stats = ['gs_total', 'k_pitched_total', 'ip_total', 'g_pitched_total']
         years = [2014]
         for year in years:
             infile = '%s/Pitcher/%d/%d Total Pitcher Stats.csv' %(self.statsDir, year, year)
@@ -340,7 +340,7 @@ class PlayerStats:
             pitcher_points_expected_for_k
             pitcher_expected_ip
         """
-        return self.stats[player][year]['g_total']
+        return self.stats[player][year]['g_pitched_total']
 
     def get_pitcher_total_games_started(self, year, player):
         """
