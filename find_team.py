@@ -288,17 +288,17 @@ def main():
             print "ERROR: Couldn't get score for ", p
             continue
 
-        print '%d/%d %s %s %s' %(i, len(candidate_players), p, player_stats.get_player_team(p), player_stats.get_player_fielding_position(p)), score
+        #print '%d/%d %s %s %s' %(i, len(candidate_players), p, player_stats.get_player_team(p), player_stats.get_player_fielding_position(p)), score
         names.append(p)
         classes.append(player_stats.get_player_fielding_position(p))
         values.append(eq.get_score(p))
         weights.append(player_stats.get_player_salary(p))
 
         #Print Statements for getting players and scores in csv format
-        #if player_stats.get_player_fielding_position(p) == 'P':
-            #p,',',eq.get_score(p),',',eq.pitcher_points_expected_for_win(p),',',eq.pitcher_points_expected_for_er(p),',',eq.pitcher_points_expected_for_k(p),',',eq.pitcher_expected_ip(p), ','
-        #else:
-            #p,',',eq.get_score(p),',',eq.batter_points_expected_for_hits(p),',',eq.batter_points_expected_for_hr(p),',',eq.batter_points_expected_for_rbi(p),',',eq.batter_points_expected_for_runs(p),',',eq.batter_points_expected_for_sb(p),',',eq.batter_points_expected_for_walks(p),','
+        if player_stats.get_player_fielding_position(p) == 'P':
+            p,',',eq.get_score(p),',',eq.pitcher_points_expected_for_win(p),',',eq.pitcher_points_expected_for_er(p),',',eq.pitcher_points_expected_for_k(p),',',eq.pitcher_expected_ip(p), ','
+        else:
+            print p,',',eq.get_score(p),',',eq.batter_points_expected_for_hits(p),',',eq.batter_points_expected_for_hr(p),',',eq.batter_points_expected_for_rbi(p),',',eq.batter_points_expected_for_runs(p),',',eq.batter_points_expected_for_sb(p),',',eq.batter_points_expected_for_walks(p),','
 
 
     if args.mcmc:
