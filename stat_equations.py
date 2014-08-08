@@ -245,7 +245,7 @@ class StatEquations:
             opp_pitcher = self.player_stats.get_starting_pitcher(opp_team)
 
             #Accounts for pitchers without stats by defaulting to league average and a RHP
-            if self.player_stats.get_pitcher_total_games_started(self.year, opp_pitcher) > 0:
+            if self.player_stats.get_pitcher_total_innings_pitched(self.year, opp_pitcher) > 0:
                 opp_pitcher_woba = self.player_stats.get_pitcher_woba_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
                 opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
             else:
@@ -314,7 +314,7 @@ class StatEquations:
                      self.league_stats.get_league_plate_appearance(self.year)
 
             #Accounts for pitchers without stats by defaulting to league average
-            if self.player_stats.get_pitcher_total_games_started(self.year, opp_pitcher) > 0:
+            if self.player_stats.get_pitcher_total_innings_pitched(self.year, opp_pitcher) > 0:
                 pitcher_bb_perc = 1.0 * self.player_stats.get_pitcher_bb_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand) /\
                                   self.player_stats.get_pitcher_total_batters_faced_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
             else:
@@ -373,7 +373,7 @@ class StatEquations:
                                        self.league_stats.get_league_plate_appearance(self.year)
 
             #Accounts for pitchers without stats by defaulting to league average and RHP
-            if self.player_stats.get_pitcher_total_games_started(self.year, opp_pitcher) > 0:
+            if self.player_stats.get_pitcher_total_innings_pitched(self.year, opp_pitcher) > 0:
                 opp_pitcher_hr_percentage = 1.0 * self.player_stats.get_pitcher_hr_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand) /\
                                         self.player_stats.get_pitcher_total_batters_faced_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
                 opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
@@ -500,10 +500,11 @@ class StatEquations:
             opp_pitcher = self.player_stats.get_starting_pitcher(opp_team)
 
             #Accounts for pitchers without stats by defaulting to league average and RHP
-            if self.player_stats.get_pitcher_total_games_started(self.year, opp_pitcher) > 0:
+            if self.player_stats.get_pitcher_total_innings_pitched(self.year, opp_pitcher) > 0:
                 opp_pitcher_woba = self.player_stats.get_pitcher_woba_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
                 opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
             else:
+                print 'Here in pts for runs for ', batter
                 opp_pitcher_woba = self.league_stats.get_league_woba(self.year)
                 opp_pitcher_hand = 'right'
 
@@ -577,10 +578,11 @@ class StatEquations:
             opp_pitcher = self.player_stats.get_starting_pitcher(opp_team)
 
             #Accounts for pitchers without stats by defaulting to league average and RHP
-            if self.player_stats.get_pitcher_total_games_started(self.year, opp_pitcher) > 0:
+            if self.player_stats.get_pitcher_total_innings_pitched(self.year, opp_pitcher) > 0:
                 opp_pitcher_woba = self.player_stats.get_pitcher_woba_allowed_vs_RHB_LHB(self.year, opp_pitcher, batter_hand)
                 opp_pitcher_hand = self.player_stats.get_player_throwing_hand(opp_pitcher)
             else:
+                print 'Here in pts for rbis for ', batter
                 opp_pitcher_woba = self.league_stats.get_league_woba(self.year)
                 opp_pitcher_hand = 'right'
 
@@ -609,7 +611,7 @@ class StatEquations:
             team_factor = self.team_stats.get_team_runs_total(self.year, batter_team) /\
                           (self.league_stats.get_league_runs(self.year) / 30.0)
 
-        return batter_runs_per_pa * exp_pa * batting_order_factor * ((1.5 * pitcher_eff + 1.5 * batter_eff + park_factor + team_factor) / 5)
+        return batter_runs_per_pa * exp_pa * batting_order_factor * (((1.5 * pitcher_eff) + (1.5 * batter_eff) + park_factor + team_factor) / 5)
 
     ###########
     # Overall #
