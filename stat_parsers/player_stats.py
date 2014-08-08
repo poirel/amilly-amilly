@@ -65,6 +65,7 @@ import urllib2
 import re
 from bs4 import BeautifulSoup
 import sys
+import math
 
 
 from team_stats import get_team_by_mascot
@@ -153,8 +154,7 @@ class PlayerStats:
                     uid = int(items[3])
                     team = get_team_by_mascot(items[1])
                     self.stats[(player, uid)]['teams'] = self.stats[(player, uid)].get('teams', []) + [team]
-                    xfip = float(items[2])
-                    self.stats[(player, uid)][year][stat][loc.lower()] = xfip
+                    self.stats[(player, uid)][year][stat][loc.lower()] = float(items[2])
 
     def get_pitcher_xfip_allowed(self, year, player, homeOrAway):
         """
@@ -199,8 +199,15 @@ class PlayerStats:
                     uid = int(items[6])
                     team = get_team_by_mascot(items[1])
                     self.stats[(player, uid)]['teams'] = self.stats[(player, uid)].get('teams', []) + [team]
-                    for i, stat_val in enumerate([float(x) for x in items[2:6]]):
-                        self.stats[(player, uid)][year][stats[i]][hand] = stat_val
+                    if float(items[4]) > 50:
+                        for i, stat_val in enumerate([float(x) for x in items[2:6]]):
+                            self.stats[(player, uid)][year][stats[i]][hand] = stat_val
+                    else:
+                        #print 'Less than 50 TBF for ', player
+                        self.stats[(player, uid)][year][stats[0]][hand] = math.ceil(float(items[2]) + (0.023 * (50 - float(items[4]))))
+                        self.stats[(player, uid)][year][stats[1]][hand] = math.ceil(float(items[3]) + (0.077 * (50 - float(items[4]))))
+                        self.stats[(player, uid)][year][stats[2]][hand] = float(50)
+                        self.stats[(player, uid)][year][stats[3]][hand] = float(.312)
 
     def get_pitcher_hr_allowed_vs_RHB_LHB(self, year, player, hand):
         """
@@ -321,8 +328,15 @@ class PlayerStats:
                 uid = int(items[6])
                 team = get_team_by_mascot(items[1])
                 self.stats[(player, uid)]['teams'] = self.stats[(player, uid)].get('teams', []) + [team]
-                for i, stat_val in enumerate([float(x) for x in items[2:6]]):
-                    self.stats[(player, uid)][year][stats[i]] = stat_val
+                if float(items[4]) > 15:
+                    for i, stat_val in enumerate([float(x) for x in items[2:6]]):
+                        self.stats[(player, uid)][year][stats[i]] = stat_val
+                else:
+                    #print 'Less than 20 IP for ', player
+                    self.stats[(player, uid)][year][stats[0]] = float(4)
+                    self.stats[(player, uid)][year][stats[1]] = math.ceil(float(items[3]) + (0.75 * (20 - float(items[4]))))
+                    self.stats[(player, uid)][year][stats[2]] = float(20)
+                    self.stats[(player, uid)][year][stats[3]] = float(4)
 
     def get_pitcher_total_games_played(self, year, player):
         """
@@ -480,9 +494,15 @@ class PlayerStats:
                     uid = int(items[6])
                     team = get_team_by_mascot(items[1])
                     self.stats[(player, uid)]['teams'] = self.stats[(player, uid)].get('teams', []) + [team]
-
-                    for i, stat_val in enumerate([float(x) for x in items[2:6]]):
-                        self.stats[(player, uid)][year][stats[i]][hand] = stat_val
+                    if float(items [2]) > 50:
+                        for i, stat_val in enumerate([float(x) for x in items[2:6]]):
+                            self.stats[(player, uid)][year][stats[i]][hand] = stat_val
+                    else:
+                        #print 'Less than 50 PA for ', player
+                        self.stats[(player, uid)][year][stats[1]][hand] = math.floor(float(items[3]) + (.023 * (50 - float(items[2]))))
+                        self.stats[(player, uid)][year][stats[2]][hand] = math.ceil(float(items[4]) + (.20 * (50 - float(items[2]))))
+                        self.stats[(player, uid)][year][stats[3]][hand] = ((float(items[5]) * float(items[2])) + (.312 * (50 - float(items[2])))) / 50
+                        self.stats[(player, uid)][year][stats[0]][hand] = float(50)
 
     def get_batter_plate_appearances_vs_RHP_LHP(self, year, player, hand):
         """
@@ -615,10 +635,26 @@ class PlayerStats:
                 uid = int(items[15])
                 team = get_team_by_mascot(items[1])
                 self.stats[(player, uid)]['teams'] = self.stats[(player, uid)].get('teams', []) + [team]
-                for i, stat_val in enumerate([float(x.rstrip('%')) for x in items[2:15]]):
-                    if stats[i]=='bb_percent_total':
-                        stat_val/=100.0
-                    self.stats[(player, uid)][year][stats[i]] = stat_val
+                if float(items[9]) > 50:
+                    for i, stat_val in enumerate([float(x.rstrip('%')) for x in items[2:15]]):
+                        if stats[i]=='bb_percent_total':
+                            stat_val/=100.0
+                        self.stats[(player, uid)][year][stats[i]] = stat_val
+                else: #gives average stats to player through 50 AB
+                    #print 'Less than 50 Ab for ', player
+                    self.stats[(player, uid)][year][stats[0]] = math.floor(float(items[2]) + (0.17 * (50 - float(items[9]))))
+                    self.stats[(player, uid)][year][stats[1]] = math.floor(float(items[3]) + (0.05 * (50 - float(items[9]))))
+                    self.stats[(player, uid)][year][stats[2]] = math.floor(float(items[4]) + (0.01 * (50 - float(items[9]))))
+                    self.stats[(player, uid)][year][stats[3]] = math.floor(float(items[5]) + (0.25 * (50 - float(items[9]))))
+                    self.stats[(player, uid)][year][stats[4]] = math.floor(float(items[6]) + (0.09 * (50 - float(items[9]))))
+                    self.stats[(player, uid)][year][stats[5]] = .09
+                    self.stats[(player, uid)][year][stats[6]] = math.floor(float(items[8]) + (0.03 * (50 - float(items[9]))))
+                    self.stats[(player, uid)][year][stats[9]] = ((float(items[11]) * float(items[9])) + (.252 * (50 - float(items[9])))) / 50
+                    self.stats[(player, uid)][year][stats[10]] = float(28)
+                    self.stats[(player, uid)][year][stats[11]] = math.floor(float(items[13]) + (0.03 * (50 - float(items[9]))))
+                    self.stats[(player, uid)][year][stats[12]] = math.floor(float(items[14]) + (0.01 * (50 - float(items[9]))))
+                    self.stats[(player, uid)][year][stats[7]] = 50
+                    self.stats[(player, uid)][year][stats[8]] = 55
 
     def get_batter_1b_total(self, year, player):
         """
@@ -869,19 +905,6 @@ class PlayerStats:
     def set_player_salary(self, player, salary):
         self.stats[player]['salary'] = salary
 
-    def _clean_salary(self, salary):
-        """
-        Function:_clean_salary
-        -----------------
-        Takes a salary from the fanduel file on Dropbox and removes the '$' and ','.
-
-        Parameters:
-            :param salary: value read from the fanduel file (format: $4,000)
-
-        :return salary value in new format (4000) as an integer
-        """
-        return int(salary.strip().replace('$', '').replace(',', ''))
-
     def get_player_fielding_position(self, player):
         """
         Function: get_player_fielding_position
@@ -1014,7 +1037,6 @@ class PlayerStats:
             batter_points_expected_for_rbi
         """
         return self.stats[player]['team']
-
 
     def set_player_batting_position(self, player, order):
         self.stats[player]['batting_order'] = order
