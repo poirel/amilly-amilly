@@ -295,11 +295,10 @@ def main():
         weights.append(player_stats.get_player_salary(p))
 
         #Print Statements for getting players and scores in csv format
-        if player_stats.get_player_fielding_position(p) == 'P':
-            p,',',eq.get_score(p),',',eq.pitcher_points_expected_for_win(p),',',eq.pitcher_points_expected_for_er(p),',',eq.pitcher_points_expected_for_k(p),',',eq.pitcher_expected_ip(p), ','
-        else:
-            print p,',',eq.get_score(p),',',eq.batter_points_expected_for_hits(p),',',eq.batter_points_expected_for_hr(p),',',eq.batter_points_expected_for_rbi(p),',',eq.batter_points_expected_for_runs(p),',',eq.batter_points_expected_for_sb(p),',',eq.batter_points_expected_for_walks(p),','
-
+        #if player_stats.get_player_fielding_position(p) == 'P':
+        #    print p,',',eq.get_score(p),',',eq.pitcher_points_expected_for_win(p),',',eq.pitcher_points_expected_for_er(p),',',eq.pitcher_points_expected_for_k(p),',',eq.pitcher_expected_ip(p), ','
+        #else:
+        #    p,',',eq.get_score(p),',',eq.batter_points_expected_for_hits(p),',',eq.batter_points_expected_for_hr(p),',',eq.batter_points_expected_for_rbi(p),',',eq.batter_points_expected_for_runs(p),',',eq.batter_points_expected_for_sb(p),',',eq.batter_points_expected_for_walks(p),','
 
     if args.mcmc:
         mcmc = TeamMCMC(names, classes, values, weights, CAPACITY, TEAM_COMP)
